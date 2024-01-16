@@ -134,32 +134,34 @@ Order_2_Reptile_Avian  <- bind.tree(x=Order_1_Reptile, y=consensus_AVE_Tree,
 Order_3_Reptile_Avian_Mammal <- bind.tree(x=Order_2_Reptile_Avian , y = MAM_Phylo, 
                    where = 1, interactive = FALSE)
 
-FULL_DAT <- rbind(Avian_MERGED_F,
+FULL_DAT <- data.frame(rbind(Avian_MERGED_F,
                   Mammal_MERGED_F,
-                  Reptile_MERGED_F)
+                  Reptile_MERGED_F))[,-2, drop = FALSE]
 
-FULL_ORDER_FINAL <- keep.tip(Order_3_Reptile_Avian_Mammal,FULL_DAT$Species)
 
-FULL_Merged_Phylogeny<- phylo4d(
+FULL_ORDER_FINAL <- keep.tip(Order_3_Reptile_Avian_Mammal,row.names(FULL_DAT))
+
+FULL_Merged_Phylogeny <- phylo4d(
   FULL_ORDER_FINAL , 
-  tip.data = FULL_DAT[,-2],
+  tip.data = FULL_DAT,
   match.data = TRUE)
 
 Reptile_Data_Merged_Phylogeny <- phylo4d(
   keep.tip(consensus_REP_Tree, 
            Reptile_MERGED_F$Species),
-  tip.data =  Reptile_MERGED_F[,-2],
+  tip.data =  FULL_DAT,
   match.data = TRUE
 )
 
 Mammal_Data_Merged_Phylogeny <- phylo4d(
   keep.tip(MAM_Phylo, Mammal_MERGED_F$Species),
-  tip.data =  Mammal_MERGED_F[,-2],
+  tip.data =  FULL_DAT,
   match.data = TRUE
 )
 
 Avian_Data_Merged_Phylogeny <- phylo4d(
   keep.tip(consensus_AVE_Tree, Avian_MERGED_F$Species),
-  tip.data =  Avian_MERGED_F[,-2],
+  tip.data =  FULL_DAT,
   match.data = TRUE
 )
+
