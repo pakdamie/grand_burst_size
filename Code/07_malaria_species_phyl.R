@@ -60,7 +60,7 @@ parasite_sub_DURATION <- parasite_data_sub_DURATION[match(plasmodium_tree_F2_DUR
 
 ###
 PLAS_DATA_ASEXUAL <- phylo4d(plasmodium_tree_F2_ASEX, 
-                             tip.data = parasite_sub_ASEXUAL[,-1] , 
+                             tip.data = parasite_sub_ASEXUAL , 
                               match.data = TRUE)
 PLAS_DATA_DURATION <- phylo4d(plasmodium_tree_F2_DURATION, tip.data = parasite_sub_DURATION[,-1] , 
                              match.data = TRUE)

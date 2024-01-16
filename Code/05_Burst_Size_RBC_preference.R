@@ -1,11 +1,15 @@
+###This script is to plot and explore if there is any 
+###relationship with the upper burst size and
+###RBC_preference
+
 library(here)
-library(ggplot2)
-library(ggbeeswarm)
+source(here("Code","Functions", "Package_Loader.R"))
+
 ###Malaria Data - Species
-mal_dat <- read.csv(here("Data","MALARIA_PAK_SPECIES.csv"))
+malaria_species_dat <- read.csv(here("Data","MALARIA_PAK_SPECIES.csv"))
 
 ###Subset the data
-subsetted_mal_dat <-   mal_dat[,c("Plasmodium.species",
+subsetted_mal_dat <-   malaria_species_dat[,c("Plasmodium.species",
                                   "Average",
                                   "Lower",
                                   "Upper",
@@ -13,6 +17,8 @@ subsetted_mal_dat <-   mal_dat[,c("Plasmodium.species",
                                   "Duration",
                                   "OrderHost")]
 
+###I am only interested in the small subset of the Plasmodium 
+###parasite species data that have any information on the RBC_preference!
 subsetted_mal_dat_preference <- subset(subsetted_mal_dat,
                                       subsetted_mal_dat$RBC_preference != " " &
                                       subsetted_mal_dat$RBC_preference != ""  )
@@ -24,7 +30,7 @@ subsetted_mal_dat_preference$RBC_preference <-
 
 ggplot(subsetted_mal_dat_preference , 
        aes(x = RBC_preference, y = Upper, fill = RBC_preference)) + 
-       geom_point(shape = 21, size = 5)+
+       geom_point(shape = 21, size = 5, stroke= 1.2) +
        scale_fill_viridis(option = 'mako', discrete = TRUE)+
        xlab("RBC preference") +
        ylab("Upper burst size") +
@@ -34,6 +40,6 @@ ggplot(subsetted_mal_dat_preference ,
         axis.title = element_text(size = 16, color = 'black'))
 
 
-ggsave(here("Figure","Data_Analysis",
+ggsave(here("Figures","Raw",
             "Upper_Burst_Size_Preference_Figure.pdf"),
        width = 8, height = 6, units = 'in')
