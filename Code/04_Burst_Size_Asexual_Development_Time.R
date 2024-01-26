@@ -4,8 +4,8 @@
 ###This is the plot making figure
 
 library(here)
-library(ggplot2)
-library(ggbeeswarm)
+source(here("Code","Functions", "Package_Loader.R"))
+
 ###Malaria Data - Species
 mal_dat <- read.csv(here("Data","MALARIA_PAK_SPECIES.csv"))
 
@@ -76,7 +76,6 @@ UPPER_GG  <- ggplot(Full_Mal_Duration_Data,
         axis.title = element_text(size = 16, color = 'black'))
 
 UPPER_GG
-
 
 ggsave(here("Figure","Data_Analysis","Burst_Size_AesxualDuration_Figure.pdf"),
        width = 10, height = 4, units = 'in')
