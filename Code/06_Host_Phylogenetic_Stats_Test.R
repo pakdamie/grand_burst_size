@@ -8,11 +8,11 @@ source(here("Code","05_phylogeny_full_combiner.R"))
 
 FULL_SUPER_TREE_ABOUHEIF.MORAN <- abouheif.moran(FULL_Merged_Phylogeny, nrepet = 1000)
 
-plot(FULL_SUPER_TREE_ABOUHEIF.MORAN, main = "Upper burst")
+plot(FULL_SUPER_TREE_ABOUHEIF.MORAN, main = "Upper burst size")
 
-REPTILE_TEST <- abouheif.moran(Reptile_Data_Merged_Phylogeny, nrepet = 1000)
-MAMMAL_TEST <- abouheif.moran(Mammal_Data_Merged_Phylogeny, nrepet = 1000)
-AVIAN_TEST <- abouheif.moran(Avian_Data_Merged_Phylogeny, nrepet = 1000)
+REPTILE_TEST <- abouheif.moran(Reptile_Data_Merged_Phylogeny, nrepet = 5000)
+MAMMAL_TEST <- abouheif.moran(Mammal_Data_Merged_Phylogeny, nrepet = 5000)
+AVIAN_TEST <- abouheif.moran(Avian_Data_Merged_Phylogeny, nrepet = 5000)
 
 plot(REPTILE_TEST,main = "Upper burst (Squamates)")
 plot(MAMMAL_TEST,main = "Upper burst (Mammal")

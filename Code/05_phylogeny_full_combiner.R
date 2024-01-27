@@ -4,7 +4,8 @@
 library(here)
 source(here("Code", "Functions", "Package_Loader.R"))
 source(here("Code","Functions","Merger_ParasiteTrait_HostPhylo.R"))
-
+source(here("Code","Functions","util_remove_underscore.R"))
+source(here("Code", "Functions", "Identifier_Burst_Size_Order.R"))
 ############################
 ###Host and Parasite data ##
 ############################
@@ -14,10 +15,10 @@ Malaria_Parasite_Dat <- read.csv(here("Data", "MALARIA_PAK_SPECIES.csv"))
 ###########
 ###Reptile#
 ###########
-
 REP_Host_Dat <- subset(Malaria_Host_Dat,
                           Malaria_Host_Dat$Group == 'reptile')
 REP_Phylo <- read.nexus(here('Data',"Reptile","reptile_phylo_1000.nex")) 
+
 ###1000 phylogenetic tree
 
 
@@ -139,10 +140,10 @@ FULL_DAT <- data.frame(rbind(Avian_MERGED_F,
                   Reptile_MERGED_F))[,-2, drop = FALSE]
 
 
-FULL_ORDER_FINAL <- keep.tip(Order_3_Reptile_Avian_Mammal,row.names(FULL_DAT))
+FULL_ORDER_FINAL <-keep.tip(Order_3_Reptile_Avian_Mammal ,row.names(FULL_DAT))
 
-FULL_Merged_Phylogeny <- phylo4d(
-  FULL_ORDER_FINAL , 
+FULL_Merged_Phylogeny<- phylo4d(
+  FULL_ORDER_FINAL ,
   tip.data = FULL_DAT,
   match.data = TRUE)
 
