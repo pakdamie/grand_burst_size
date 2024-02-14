@@ -9,7 +9,7 @@ Host_List <- NULL
 
 for (species in seq(1,nrow(host_dat))){
 ###Go through each row (looking at each host) and extract the malaria species
-    parasite_species <- str_split_1(host_dat[species,]$P.Species, ";")
+    parasite_species <- str_split_1(host_dat[species,]$Parasite, ";")
     ###
     times_to_replicate <- length(parasite_species)
     ### Recreate the data.frame 
@@ -24,14 +24,14 @@ for (species in seq(1,nrow(host_dat))){
 Host_List_F <- do.call(rbind, Host_List)
 
 ###Try Mammal
-Host_List_F_Mammal <- subset(Host_List_F, Host_List_F$Order == 'Mammal')
+Host_List_F_Mammal <- subset(Host_List_F, Host_List_F$Group == 'mammal')
 Host_List_F_Mammal$Presence <- 1
 
 
 Mammal_Expanded_Grid <- 
-            expand.grid(H.Species = unique(Host_List_F_Mammal$H.Species),
+            expand.grid(H.Species = unique(Host_List_F_Mammal$Species),
             P.Species =  unique(Host_List_F_Mammal$P.Species))
-
+colnames(Host_List_F_Mammal)[1] <- "H.Species"
 Full_Mammal_Expanded_Grid <- left_join(Mammal_Expanded_Grid, 
                                        Host_List_F_Mammal,
                                        by = c("H.Species", "P.Species"))
@@ -41,18 +41,7 @@ zero_indices_mammal<- is.na(Full_Mammal_Expanded_Grid$Presence)==TRUE
 
 Full_Mammal_Expanded_Grid$Presence[zero_indices_mammal] <- 0
 
-ggplot(Full_Mammal_Expanded_Grid, 
-      aes(x = H.Species, y = P.Species, fill = as.factor(Presence),
-          color = as.factor(Presence)))+
-      geom_tile()+
-      scale_color_manual(values=c("1" = "black", "0" = 'darkgrey'))+
-      scale_fill_manual(values=c("1" = "#FF5632", "0" = '#d8d4d4'))+
-      theme(axis.text.x = element_text(
-                          angle = 90, 
-                          vjust = 0.5, 
-                          hjust=1)) + 
-      xlab("Host species")+ 
-      ylab("Plasmoidum species")
+
       
 
 ###Try Reptile

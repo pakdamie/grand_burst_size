@@ -1,6 +1,7 @@
 ###This script is to clean the data to make the large
 ###burst size figure 
 library(here)
+source(here("Code","Functions","Order_Plasmodium_Host.R"))
 
 mal_dat <- read.csv(here("Data","MALARIA_PAK_SPECIES.csv"))
 
@@ -98,7 +99,8 @@ mal_mammal_GG <-
     aes(x = Lower, 
         xend = Upper, 
         y = Plasmodium.species,
-        yend = Plasmodium.species))+
+        yend = Plasmodium.species,
+        color = Subgenus))+
   geom_point(shape = 21, 
              size = 3
   ) +
@@ -106,6 +108,10 @@ mal_mammal_GG <-
   ylab("")+
   scale_x_continuous(breaks=seq(0,40,5))+
   scale_fill_manual(values = c(" " = "grey",
+                               "Laverania" = "#a86462",
+                               "Plasmodium" = "#bd302c",
+                               "Vinckeia" = "#560D0D"))+
+  scale_color_manual(values = c(" " = "grey",
                                "Laverania" = "#a86462",
                                "Plasmodium" = "#bd302c",
                                "Vinckeia" = "#560D0D"))+
