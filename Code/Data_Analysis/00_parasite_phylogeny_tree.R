@@ -1,8 +1,8 @@
 ###This is to do analysis on the Plasmodium 
 ###phylogeny itself
 library(here)
-source(here("Code","Functions","Package_Loader.R"))
-source(here("Code", "Functions","renamer_label.R"))
+source(here("Code","Functions","FUNC_Package_Loader.R"))
+source(here("Code", "Functions","FUNC_renamer_label.R"))
 
 ###Loading in the malaria parasite data (parasite_dat)
 ###as well as the phylogenetic

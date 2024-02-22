@@ -29,6 +29,8 @@ consensus_REP_Tree <- consensus(REP_Phylo, p = 0.5, check.labels = TRUE,rooted =
 consensus_MAM_Tree <- consensus(MAM_Phylo, p = 0.5, check.labels = TRUE,rooted = TRUE)
 
 consensus_AVE_Tree <- multi2di(consensus_AVE_Tree, random = TRUE)
+consensus_REP_Tree <- multi2di(consensus_REP_Tree, random = TRUE)
+consensus_MAM_Tree <- multi2di(consensus_MAM_Tree, random = TRUE)
 
 
 
