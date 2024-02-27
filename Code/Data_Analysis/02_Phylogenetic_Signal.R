@@ -55,26 +55,6 @@ model_null <- brm(
   data2 = list(vcv_Plasmodium = vcv_Plasmodium,
                vcv_TypeHost = vcv_TypeHost ))
 
-###All random effects (total variance) 
-PPD <- brms::posterior_predict(model_null, re_formula = NA) #re_formual = ALL random effect
-var_total <- apply(PPD, MARGIN = 1, FUN = stats::var) #the total variance 
-
-###Fixed effects (fixed variance)
-PPD_0 <- brms::posterior_predict(model_null, re_formula = NULL) #re_formual = ALL random effect
-var_fixed <- apply(PPD_0, MARGIN = 1, FUN = stats::var)
-
-###Host (random variance)
-PPD_H<- brms::posterior_predict(model_null, re_formula =  
-                                  ~(1|gr(Type.Host , cov = vcv_TypeHost))) #re_formual = ALL random effect
-var_host <- apply(PPD_H, MARGIN = 1, FUN = stats::var)
-
-###Host (random variance)
-PPD_P<- brms::posterior_predict(model_null, re_formula =  
-                                  ~(1|gr(Plasmodium.species , cov = vcv_Plasmodium))) #re_formual = ALL random effect
-var_parasite<- apply(PPD_P, MARGIN = 1, FUN = stats::var)
-
-(var_parasite ) /(var_total)
-
 performance::variance_decomposition(model_null, re_formula =  
                          ~(1|gr(Plasmodium.species , cov = vcv_Plasmodium)))
 
