@@ -29,10 +29,9 @@ Calculate_Initial_RM <- function(species, criss_cross) {
       "PC" = 8500000,
       "PF" = 5e6
     )
-
-
     RM_limit_1 <- initial_RM_modifier * time_delayer * ((p_val * R_val) + mu_M) / (p_val * R_val)
- }else if (criss_cross == "YES") {
+
+     }else if (criss_cross == "YES") {
     time_delayer_CROSSED <- switch(species,
       "PC" = ((100 * (1 / 2) + (1 / 40))^100) / (100 * (1 / 2))^100,
       "PF" = ((10 * (1 / 1) + (1 / 120))^10) / (10 * (1 / 1))^10
@@ -69,20 +68,19 @@ Calculate_Initial_RM <- function(species, criss_cross) {
 
 ###SIMULATE THE MODEL
 FULL_MODEL_SIMULATING_Duration <- function(initial_value, id, species){
- 
+  
   R_0 = seq(1,50,0.5) #For chabaudi 
   R_0_SQUARED = R_0^2 #For falciparum
-  C_V = seq(.1,1,0.1)
   ##########################################################
   ###THE FIRST PART OF THE MODEL, trying to figure out what#
   ###parameter combinations we want to be looking at       #
   ##########################################################
   ### Burst Size and Transmission Investment ###
-  C_V <- seq(.01, 1, 0.01) # Transmission investment
+  C_V <- seq(0.01, 1, 0.01) # Transmission investment
   
-  B_V <-switch(species,
+  B_V <- switch(species,
        "PC"  =   R_0 ,
-       "PF" = R_0_SQUARED )  
+       "PF" =    R_0_SQUARED )  
   
   B_V_C_V <- expand.grid(B_V = B_V, 
                          C_V = C_V, 
@@ -113,7 +111,7 @@ FULL_MODEL_SIMULATING_Duration <- function(initial_value, id, species){
                           c(B_V_C_V_F$B_V),
                           c(B_V_C_V_F$C_V),
                           c(B_V_C_V_F$initialvalue),
-                          mc.cores = 5,
+                          mc.cores = 3,
                           SIMPLIFY = FALSE)
   
   ### Combine all list elements to make it easier to save/read
@@ -122,10 +120,10 @@ FULL_MODEL_SIMULATING_Duration <- function(initial_value, id, species){
   ### Write into a CSV TO BE SAVED
   write.csv(FULL_MODEL_DT, file = here(
     "Output", "Full_Model",
-    paste("FULL_MODEL_DT_",species,".csv")))
+    paste("FULL_MODEL_DT",species,".csv")))
   
   ###REMOVE right now to save space
-  remove( FULL_MODEL_DT)
+  remove(FULL_MODEL_DT)
   
   
   #########################################################
@@ -194,7 +192,7 @@ FULL_MODEL_SIMULATING_Duration <- function(initial_value, id, species){
   )
   
   Duration_Initial_SUCCESS$end_fitness <-
-    unlist(lapply(Fitness_MODEL, Gametocyte_Fitness, species = "PF"))
+    unlist(lapply(Fitness_MODEL, Gametocyte_Fitness, species = species))
   
   ### These are the fitness model data.frame that should work
   Fitness_MODEL_FULL <- rbind.data.frame(

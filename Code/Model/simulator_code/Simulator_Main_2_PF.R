@@ -18,10 +18,10 @@ sourceCpp(here("Code", "Model","rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 ### when the red blood cells reaches 7.6 percent of the initial
 ###RBC, using the same proportion as the mouse data
 
-rootfun <- function (t, y, parms) {return(y['R'] - 380000)}
 
 Simulator_Malaria_BC_PF <- function(B_V, C_V, initialvalue){
- 
+  rootfun <- function (t, y, parms) {return(y['R'] - 380000)}
+  
    parameters_n <- c(lambda = 2e5, # replenishment rate of RBC (#SimulatedTimeSeries.R)
                     K = 6315789, # carrying capacity of RBC population in the absence of mortality (#Simulated Time series)
                     pmax =  8.35e-6 , # rate of infection (From American Naturalist- Greischar et al. 2014)
