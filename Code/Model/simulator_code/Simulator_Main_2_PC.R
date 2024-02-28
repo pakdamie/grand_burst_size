@@ -17,7 +17,6 @@ sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 ###This is the function that terminates the integrator early
 ### when the red blood cells reaches 6.5 * 10^5
 
-
 Simulator_Malaria_BC_PC <- function(B_V, C_V, initialvalue) {
   
   rootfun <- function (t, y, parms) {return(y['R'] - 6.5*10^5)}

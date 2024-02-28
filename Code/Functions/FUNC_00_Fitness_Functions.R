@@ -49,10 +49,8 @@ Gametocyte_Fitness <- function(x, species){
 }
 
 
-RM_Calculator <- function(species, x_list, criss_cross){
+RM_Calculator <- function(species, x_list){
   
-  if (criss_cross == "NO") { # If we're not criss-crossing the parameter values
-    
     time_delayer <- switch(species,
                            "PC" = (100 * (1))^100/(100*(1) + 0.025)^100,
                            "PF" = (10 * (1/2))^10/(10*(1/2) + (1/120))^10
@@ -73,43 +71,60 @@ RM_Calculator <- function(species, x_list, criss_cross){
     
     rate =  time_delayer * (1 - unique_C_V) * unique_B_V *
       ((x_list[,"R"] *  p_val)/(( p_val * x_list[,"R"]) + mu_M))
+
+    return(rate)
+  }
+  
+
+
+RM_Calculator_Criss_Cross <- function(species, x_list, value_interest){
+  
+  if(species == "PC"){
+    
+    R_val <- 8500000
+    pmax_val <- ifelse(value_interest != "pmax",4.0e-6, 8.35e-6  )
+    alpha1_val <- ifelse(value_interest != "alpha1", 1 , 1/2 )
+    alpha2_val <- ifelse(value_interest!= "alpha2", 1/2 , 1/7 )
+    muM_val  <- ifelse(value_interest!= 'muM', 48, 200 )
+    muG_val<- ifelse(value_interest!= 'muG', 4,  log(2)/2.4)
     
     
-  } else if (criss_cross == "YES") {
-    time_delayer_CROSSED <- switch(species,
-                                   "PC" =(100 * (1/2))^100/(100*(1/2) + 0.025)^100,
-                                   "PF" = (10 * (1))^10/(100*(1) + (1/120))^10,
-    )
-    
-    p_val_CROSSED <- switch(species,
-                            "PC" = 8.35e-6,
-                            "PF" = 4.0e-6
-    )
-    
-    mu_M_CROSSED <- switch(species,
-                           "PC" = 200,
-                           "PF" = 48
-    )
+    PC_Time_Delayer <- ((100 * alpha1_val + (1 / 40))^100) / (100 *  alpha1_val )^100
     
     unique_B_V <- unique(x_list$B_V)
     unique_C_V <- unique(x_list$C_V)
     
-    rate =   time_delayer_CROSSED  * (1 - unique_C_V) * unique_B_V *
-      ((x_list[,"R"] *  p_val_CROSSED )/(( p_val_CROSSED  * x_list[,"R"]) + mu_M_CROSSED))
+    rate =   PC_Time_Delayer * (1 - unique_C_V) * unique_B_V *
+      ((x_list[,"R"] *  pmax_val)/(( pmax_val * x_list[,"R"]) +  muM_val))    
+  }
+  else if (species == "PF"){
     
+    R_val <-  5e6
+    pmax_val <- ifelse(value_interest!= "pmax",8.35e-6 , 4.0e-6 )
+    alpha1_val <- ifelse(value_interest!= "alpha1", 1/2, 1/2 )
+    alpha2_val <- ifelse(value_interest!= "alpha2",1/7, 1/2)
+    muM_val  <- ifelse(value_interest != 'muM',200, 48)
+    muG_val<- ifelse(value_interest!= 'muG',log(2)/2.4,  4)
     
-      
+    PF_Time_Delayer <- ((10 * alpha1_val + (1 / 120))^10) / (10 *  alpha1_val )^10
     
-    }
-  return(rate )
-}    
+    unique_B_V <- unique(x_list$B_V)
+    unique_C_V <- unique(x_list$C_V)
+    
+    rate =   PF_Time_Delayer * (1 - unique_C_V) * unique_B_V *
+      ((x_list[,"R"] *  pmax_val)/(( pmax_val * x_list[,"R"]) +  muM_val))    
+    
+  }
+  
+  return(rate)
+}
 
 
 ###################################################
 ###INPUT: The element of the full deSolve output###
 ### as well as the mu_M                         ###
 ###################################################
-Finder_RM <- function(x_list, species, criss_cross) {
+Finder_RM <- function(x_list, species, criss_cross, value_interest) {
   
     ###If it's NA that means that it never kills the host,
     ###If it's a numeric value, that means it kills the host.
@@ -139,7 +154,7 @@ Finder_RM <- function(x_list, species, criss_cross) {
       
       end_fitness_mort <-  sum(fitness_func (truncate_G_TS) * 1/10)
       
-      df<- data.frame(
+      df <- data.frame(
         endtime = infection_length,
         up_down = "up" ,
         end_fitness = end_fitness_mort, 
@@ -151,11 +166,26 @@ Finder_RM <- function(x_list, species, criss_cross) {
      unique_C_V <- unique(x_list$C_V)
      
      
-      RM_time_df <-  cbind.data.frame(time = x_list[,'time'],
-                                      rate = RM_Calculator(species,x_list,criss_cross), 
-                                      B_V = unique_B_V ,
-                                      C_V = unique_C_V)
-      
+     criss_cross_RM <- switch(criss_cross,
+                              "NO" = RM_Calculator,
+                              "YES" = RM_Calculator_Criss_Cross)
+     
+     
+     if (criss_cross == "YES"){
+    RM_time_df <-  cbind.data.frame(time = x_list[,'time'],
+                                    rate = criss_cross_RM(species,x_list, value_interest), 
+                                    B_V = unique_B_V ,
+                                    C_V = unique_C_V)
+     }
+     else if (criss_cross == "NO"){
+       RM_time_df <-  cbind.data.frame(time = x_list[,'time'],
+                                       rate = criss_cross_RM(species,x_list), 
+                                       B_V = unique_B_V ,
+                                       C_V = unique_C_V)
+     }
+       
+       
+     
       min_RM <- RM_time_df[which.min(RM_time_df$rate),]
       
       end_time <- subset(RM_time_df, 
