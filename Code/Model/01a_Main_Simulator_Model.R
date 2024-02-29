@@ -11,7 +11,7 @@ library(here)
 # This is one of the longer code to source
 
 ### Packages to load
-source(here("Code", "Helper_Function_Code", "FUNC_00_Packages_Loader.R"))
+source(here("Code", "Functions", "FUNC_Package_Loader.R"))
 
 ### Main modeling code
 sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_CUT.cpp"))

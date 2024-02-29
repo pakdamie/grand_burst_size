@@ -6,7 +6,7 @@ sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_CUT.cpp"))
 sourceCpp(here("Code", "Model","rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 source(here("Code", "Functions", "FUNC_00_Fitness_Functions.R"))
 source(here("Code", "Functions", "FUNC_02_Simulator_Code.R"))
-
+source(here("Code","Functions","Optimal_Value_Interest_Finder.R"))
 value_interest <- c('pmax','alpha1', 'alpha2','muM','muG')
 initial_value_PC <- 4385.965
 C_V_opt <- 0.76
@@ -65,7 +65,7 @@ FULL_MODEL_VALUE_INTEREST_PF_DT <- do.call(rbind,FULL_MODEL_VALUE_INTEREST_PF)
 write.csv(FULL_MODEL_VALUE_INTEREST_PF_DT, file = "FULL_MODEL_VALUE_INTEREST_PF_DT.csv")
 
 
-PC_OPT <- Optimal_burst_size_finder(FULL_MODEL_VALUE_INTEREST_PC_DT, "PC")
+PC_OPT <- Optimal_burst_size_finder(as.data.frame(FULL_MODEL_VALUE_INTEREST_PC_DT), "PC")
 PF_OPT <- Optimal_burst_size_finder(FULL_MODEL_VALUE_INTEREST_PF_DT,"PF")
                           
 ALL_OPT <- rbind(PC_OPT, PF_OPT)

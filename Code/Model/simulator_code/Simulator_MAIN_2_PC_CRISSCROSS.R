@@ -114,8 +114,6 @@ Simulator_PC_Criss_Cross_Cut <- function(variable_interest, B_V, C_V_opt,
   times <- seq(0, 100, by = 1 / 10)
   
   
-  times <- seq(0, 100, by = 1 / 10)
-  
   out_DDE <- ode(
     y = inits_n, times = times,
     func = Erlang_Malaria_Cut,

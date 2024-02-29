@@ -48,4 +48,47 @@ PF_GG_SurfacePlot <- MAIN_SURFACEPLOT_GG_GRAPHER_FIT(Fitness_MODEL_PF ,"PF")
 Best_Strategy_Finder(Fitness_MODEL_PC);#15.5, 0.76
 Best_Strategy_Finder(Fitness_MODEL_PF) #4.5 0.56
 
+### 
+Fitness_MODEL_PC_CV_OPT <- subset(Fitness_MODEL_PC, Fitness_MODEL_PC$C_V == 0.76)
+Fitness_MODEL_PC_CV_OPT$species <- "PC"
+Fitness_MODEL_PC_CV_OPT$R <- Fitness_MODEL_PC_CV_OPT$B_V
+
+Fitness_MODEL_PF_CV_OPT <- subset(Fitness_MODEL_PF, Fitness_MODEL_PF$C_V == 0.76)
+Fitness_MODEL_PF_CV_OPT$species <- "PF"
+Fitness_MODEL_PF_CV_OPT$R <- sqrt(Fitness_MODEL_PF_CV_OPT$B_V)
+
+
+
+Fitness_MODEL_CV_OPT <- rbind.data.frame(Fitness_MODEL_PC_CV_OPT , Fitness_MODEL_PF_CV_OPT )
+
+ggplot(Fitness_MODEL_CV_OPT ,
+       aes(x = R, y = endtime + 0.05, 
+           fill =status))+
+         geom_density(stat='identity',outline.type = 'full')+
+         facet_wrap(~species)+
+         scale_fill_manual(values = c('grey',"black",'#F14889'))+
+         xlab("R")+
+         ylab("Duration of acute phase")+
+         theme_classic()+
+         theme(strip.background = element_blank(),
+               axis.text = element_text(size = 12),
+               axis.title = element_text(size = 13),
+               strip.text = element_text (size = 15))
+  
+  
+ggplot(subset(Fitness_MODEL_CV_OPT ,
+              Fitness_MODEL_CV_OPT$status == 'success'),
+       aes(x = B_V, y = endtime + 0.05, 
+           fill =species))+
+  geom_density(stat='identity',outline.type = 'full')+
+  scale_fill_manual(name = "",values = c('#4B878BFF','#D01C1FFF'))+
+  xlab("Burst size")+
+  ylab("Duration of acute phase")+
+  theme_classic()+
+  theme(strip.background = element_blank(),
+        axis.text = element_text(size = 12),
+        axis.title = element_text(size = 13),
+        strip.text = element_text (size = 15))
+
+
 

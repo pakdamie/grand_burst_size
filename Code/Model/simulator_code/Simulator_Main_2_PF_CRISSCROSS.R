@@ -1,17 +1,21 @@
 ###Function to help me create different  parameters to 
 ###criss-cross with  <- function(B_V, C_V, initialvalue) {
 
-Simulator_PF_Criss_Cross <- function(variable_interest, B_V, C_V_opt,initialvalue){
+Simulator_PF_Criss_Cross <- function(variable_interest,B_V,C_V_opt,initialvalue){
   
   rootfun <- function (t, y, parms) {return(y['R'] - 380000)}
   
   ###if the variable_interest is NOT pmax_val than keep original-
   ###else, criss-cross with P. falciparum!
-  pmax_val <- ifelse(variable_interest != "pmax",  8.35e-6, 4.0e-6)
-  alpha1_val <- ifelse(variable_interest != "alpha1",1/2, 1  )
-  alpha2_val <- ifelse(variable_interest != "alpha2",1/7, 1/2  )
-  muM_val  <- ifelse(variable_interest != 'muM', 200, 48 )
-  muG_val<- ifelse(variable_interest != 'muG',  log(2)/2.4, 4)
+  pmax_val <- ifelse(variable_interest != "pmax", 8.35e-6, 4.0e-6)
+  alpha1_val <- ifelse(variable_interest != "alpha1", 1/2, 1)
+  alpha2_val <- ifelse(variable_interest != "alpha2", 1/7, 1/2)
+  muM_val  <- ifelse(variable_interest != 'muM',200, 48)
+  muG_val<- ifelse(variable_interest != 'muG', log(2)/2.4, 4)
+  
+
+  print(c(pmax_val,alpha1_val, alpha2_val, muM_val, muG_val))
+  
   
   params_PF<- c(lambda = 2e5, # replenishment rate of RBC (#SimulatedTimeSeries.R)
                     K = 6315789, # carrying capacity of RBC population in the absence of mortality (#Simulated Time series)
@@ -32,17 +36,15 @@ Simulator_PF_Criss_Cross <- function(variable_interest, B_V, C_V_opt,initialvalu
   )
   
   
-  
   n1 <-params_PF["n1"]
   ### The number of subcompartments for immature gametocytes
   n2 <- params_PF["n2"]
-  
   
   inits_n <- c(R =  5e6, 
                I = rep(initialvalue/n1, n1),
                M = 0,
                IG=rep(0,n2),
-               G =0)
+               G = 0)
   
   ### We just want to figure out when the peak infected RBC is at.
   times <- seq(0, 100, by = 1 / 10)
@@ -101,7 +103,7 @@ Simulator_PF_Criss_Cross_Cut <- function(variable_interest, B_V, C_V_opt,
   n2 <- params_PF ["n2"]
 
   
-  inits_n <- c(R =  5e6, 
+  inits_n <- c(R = 5e6, 
                I = rep(initialvalue/n1, n1),
                M = 0,
                IG=rep(0,n2),

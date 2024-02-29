@@ -2,61 +2,42 @@
 ###THIS IS THE FUNCTION THAT SIMULATES INFECTIONS         #
 ###AND TELLS YOU THE FITNESS AT THE END OF THE ACUTE PHASE#
 ###########################################################
+
 ###This calculates the initial RM that allows for the parasites
 ###to establish. Species include "PC" or "PF" and criss_cross
 ###indicate that the parameters are switched.
 
-Calculate_Initial_RM <- function(species, criss_cross) {
+Calculate_Initial_RM <- function(species) {
   initial_RM_modifier <- 1.5 # The threshold for establishment.
-  if (criss_cross == "NO") { # If we're not criss-crossing the parameter values
+                             # If we're not criss-crossing the parameter values
 
     time_delayer <- switch(species,
       "PC" = ((100 * (1 / 1) + (1 / 40))^100) / (100 * (1 / 1))^100,
       "PF" = ((10 * (1 / 2) + (1 / 120))^10) / (10 * (1 / 2))^10
     )
 
-    p_val <- switch(species,
+    p_val <- switch(species, #INVASION RATE
       "PC" = 4.0e-6,
       "PF" = 8.35e-6
     )
 
-    mu_M <- switch(species,
+    mu_M <- switch(species, #MEROZOITE MORTALITY 
       "PC" = 48,
       "PF" = 200
     )
 
-    R_val <- switch(species,
+    R_val <- switch(species, #INITIAL RBC 
       "PC" = 8500000,
       "PF" = 5e6
     )
+    
     RM_limit_1 <- initial_RM_modifier * time_delayer * ((p_val * R_val) + mu_M) / (p_val * R_val)
 
-     }else if (criss_cross == "YES"){
-    time_delayer_CROSSED <- switch(species,
-      "PC" = ((100 * (1 / 2) + (1 / 40))^100) / (100 * (1 / 2))^100,
-      "PF" = ((10 * (1 / 1) + (1 / 120))^10) / (10 * (1 / 1))^10
-    )
-
-    p_val_CROSSED <- switch(species,
-      "PC" = 8.35e-6,
-      "PF" = 4.0e-6
-    )
-
-    mu_M_CROSSED <- switch(species,
-      "PC" = 200,
-      "PF" = 48
-    )
-
-    R_val <- switch(species,
-      "PC" = 8500000,
-      "PF" = 5e6
-    )
-
-
-    RM_limit_1 <- initial_RM_modifier * time_delayer_CROSSED * ((p_val_CROSSED * R_val) + mu_M) / (p_val_CROSSED * R_val)
-     }
-  return( RM_limit_1 )
+    return( RM_limit_1)
 }
+
+###This calculates the intitial RM for when you're criss-crossing
+###each individual parameter
 
 Calculate_Initial_RM_CrissCross <- function(species, value_interest) {
   
@@ -80,21 +61,20 @@ Calculate_Initial_RM_CrissCross <- function(species, value_interest) {
 
     R_val <-  5e6
     pmax_val <- ifelse(value_interest!= "pmax",8.35e-6 , 4.0e-6 )
-    alpha1_val <- ifelse(value_interest!= "alpha1", 1/2, 1/2 )
+    alpha1_val <- ifelse(value_interest!= "alpha1", 1/2, 1 )
     alpha2_val <- ifelse(value_interest!= "alpha2",1/7, 1/2)
     muM_val  <- ifelse(value_interest != 'muM',200, 48)
     muG_val<- ifelse(value_interest != 'muG',log(2)/2.4,  4)
       
       
-    time_delayer_CROSSED <- ((10 * alpha1_val + (1 / 120))^10) / (10 *  alpha1_val )^10
+     time_delayer_CROSSED <- ((10 * alpha1_val + (1 / 120))^10) / (10 *  alpha1_val )^10
       
-      RM_limit_1 <- initial_RM_modifier * time_delayer_CROSSED * (( pmax_val * R_val) +   muM_val) / (  pmax_val * R_val)
+      RM_limit_1 <- initial_RM_modifier * time_delayer_CROSSED * (( pmax_val * R_val) +   muM_val) / (pmax_val * R_val)
       
     }
     
     return(RM_limit_1)
   }
-
 
 #Input: 
 #1)initial_value - The different intial values for the infected RBC inoculum
@@ -103,46 +83,54 @@ Calculate_Initial_RM_CrissCross <- function(species, value_interest) {
 #3 id - give it a low, med, high id
 
 
-###SIMULATE THE MODEL
-FULL_MODEL_SIMULATING_Duration <- function(initial_value, id, species){
- 
+###SIMULATE THE MODEL AS IS FOR PLASMODIUM CHABAUDI OR PLASMODIUM
+###FALCIPARUM
+FULL_MODEL_SIMULATING_Duration <- function(initial_value, species){
+  ###THE FIRST PART OF THE MODEL, trying to figure out what
+  ###parameter combinations we want to simulate      
+
+  ### Burst Size and Transmission Investment ###
+  
+  
   R_0 = seq(1,50,0.5) #For chabaudi 
   R_0_SQUARED = R_0^2 #For falciparum
-  ##########################################################
-  ###THE FIRST PART OF THE MODEL, trying to figure out what#
-  ###parameter combinations we want to be looking at       #
-  ##########################################################
-  ### Burst Size and Transmission Investment ###
+  
   C_V <- seq(0.01, 1, 0.01) # Transmission investment
   
   B_V <- switch(species,
        "PC"  =   R_0 ,
        "PF" =    R_0_SQUARED )  
   
+  # Different combinations of burst size, transmission investment, as
+  # well as initial value 
+  
   B_V_C_V <- expand.grid(B_V = B_V, 
                          C_V = C_V, 
-                         initialvalue = initial_value) # Different combinations
+                         initialvalue = initial_value) 
   
-  
-  ###We can already take out parameter combinations that would not
-  ###lead to the establishment of infection
-  
-  RM_limit_1 <- Calculate_Initial_RM(species,"NO")
-  
-  B_V_C_V$Establish <- ifelse((1 - B_V_C_V$C_V) * B_V_C_V$B_V >= RM_limit_1,
-                            "Establish", "Fail")
 
-  ### Simulate infections that are successful (may kill host!)
+  ###We can already take out parameter combinations that would not
+  ###lead to the establishment of infection by looking at the initial
+  ###RM threshold
+  
+  RM_limit_1 <- Calculate_Initial_RM(species)
+  
+  ###If the replicative capacity (1-CV)B is greater than the RM threshold,
+  ###then the infection is established.
+  B_V_C_V$Establish <- ifelse((1 - B_V_C_V$C_V) * B_V_C_V$B_V >= RM_limit_1,
+                            "Establish", 
+                            "Fail")
+
+  ### Subset parameter estimations that are successful (may kill host!)
   B_V_C_V_F <- subset(B_V_C_V, B_V_C_V$Establish == "Establish")
 
-  ### These infections are successful OR lead to host mortality
- 
-  model_sim <- switch(species,
+  ###Using our simulator specific to the species 
+    model_sim <- switch(species,
                       "PC" = Simulator_Malaria_BC_PC,
-                      "PF" = Simulator_Malaria_BC_PF 
-                      
-  )
-  
+                      "PF" = Simulator_Malaria_BC_PF)
+    
+   ###Run the Full Model###
+     
    FULL_MODEL <-  mcmapply(model_sim,
                           c(B_V_C_V_F$B_V),
                           c(B_V_C_V_F$C_V),
@@ -156,15 +144,16 @@ FULL_MODEL_SIMULATING_Duration <- function(initial_value, id, species){
   ### Write into a CSV TO BE SAVED
   write.csv(FULL_MODEL_DT, file = here(
     "Output", "Full_Model",
-    paste("FULL_MODEL_DT",species,".csv")))
+    paste("FULL_MODEL_DT",species,".csv", sep = "")))
   
-  ###REMOVE right now to save space
+  ###Remove it now to save space
   remove(FULL_MODEL_DT)
   
   
   #########################################################
   ###THIS THEN FIGURES OUT THE DURATION OF THE ACUTE PHASE#
   #########################################################
+  
   Duration_Initial <- 
     do.call(
       rbind,
@@ -182,7 +171,7 @@ FULL_MODEL_SIMULATING_Duration <- function(initial_value, id, species){
   
   ###Now we can find the parameter combinations that lead to 
   ###unestablished infection- we then set the values 
-  ###manually to 9
+  ###manually to 0
   
   Failed_B_V_C_V <- subset(B_V_C_V, B_V_C_V$Establish == "Fail")
   
@@ -210,7 +199,7 @@ FULL_MODEL_SIMULATING_Duration <- function(initial_value, id, species){
   )
   
   
-  
+  ###Simulate with the cut-data 
   model_sim <- switch(species,
                       "PC" = Simulator_MalariaPC_DDE_BC_Cut,
                       "PF" = Simulator_MalariaPF_DDE_BC_Cut
@@ -248,28 +237,29 @@ FULL_MODEL_SIMULATING_Duration <- function(initial_value, id, species){
 }
 
 
-###SIMULATE The MODEL FOR CRISS_CROSSING
+###SIMULATE The MODEL FOR CRISS_CROSSING FOR PLASMODIUM CHABAUDI OR
+###PLASMODIUM FALCIPARUM
 FULL_MODEL_SIMULATING_Duration_criss_cross <- function(value_interest, 
                                                        initial_value, 
                                                        C_V_opt, 
                                                        id, 
                                                        species){
   
-  R_0 <- seq(1,50,0.5)
-  
+  R_0 <- seq(1,50,0.5) #BV
+
   if (value_interest == "alpha1"){
-  R_0_PC = R_0^2  #For chabaudi 
-  R_0_PF =  R_0 #For falciparum
-  }
+  R_0_PC = R_0^2  #For chabaudi (We're criss-crossing)
+  R_0_PF =  R_0}   #For falciparum
+ 
+  
   else if (value_interest != "alpha1"){
   R_0_PC = R_0  #For chabaudi 
-  R_0_PF= R_0^2 #For falciparum
-    }
+  R_0_PF= R_0^2} #For falciparum
   
-  ##########################################################
-  ###THE FIRST PART OF THE MODEL, trying to figure out what#
-  ###parameter combinations we want to be looking at       #
-  ##########################################################
+  
+ 
+  ###THE FIRST PART OF THE MODEL, trying to figure out what
+  ###parameter combinations we want to be looking at       
   ### Burst Size and Transmission Investment ###
   
   B_V <- switch(as.character(species),
@@ -315,7 +305,7 @@ FULL_MODEL_SIMULATING_Duration_criss_cross <- function(value_interest,
   ### Write into a CSV TO BE SAVED
   write.csv(FULL_MODEL_DT, file = here(
     "Output", "Full_Model",
-    paste("FULL_MODEL_DT",species,value_interest,".csv",sep="")))
+    paste("FULL_MODEL_DT", species,value_interest,".csv",sep="")))
   
   ###REMOVE right now to save space
   remove(FULL_MODEL_DT)

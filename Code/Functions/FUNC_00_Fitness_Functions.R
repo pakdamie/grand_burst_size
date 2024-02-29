@@ -80,14 +80,10 @@ RM_Calculator <- function(species, x_list){
 RM_Calculator_Criss_Cross <- function(species, x_list, value_interest){
   
   if(species == "PC"){
-    
-    R_val <- 8500000
-    pmax_val <- ifelse(value_interest != "pmax",4.0e-6, 8.35e-6  )
+    pmax_val <- ifelse(value_interest != "pmax", 4.0e-6, 8.35e-6  )
     alpha1_val <- ifelse(value_interest != "alpha1", 1 , 1/2 )
-    alpha2_val <- ifelse(value_interest!= "alpha2", 1/2 , 1/7 )
     muM_val  <- ifelse(value_interest!= 'muM', 48, 200 )
-    muG_val<- ifelse(value_interest!= 'muG', 4,  log(2)/2.4)
-    
+
     
     PC_Time_Delayer <- ((100 * alpha1_val + (1 / 40))^100) / (100 *  alpha1_val )^100
     
@@ -96,23 +92,21 @@ RM_Calculator_Criss_Cross <- function(species, x_list, value_interest){
     
     rate =   PC_Time_Delayer * (1 - unique_C_V) * unique_B_V *
       ((x_list[,"R"] *  pmax_val)/(( pmax_val * x_list[,"R"]) +  muM_val))    
+    
   }
+  
   else if (species == "PF"){
-    
-    R_val <-  5e6
     pmax_val <- ifelse(value_interest!= "pmax",8.35e-6 , 4.0e-6 )
-    alpha1_val <- ifelse(value_interest!= "alpha1", 1/2, 1/2 )
-    alpha2_val <- ifelse(value_interest!= "alpha2",1/7, 1/2)
-    muM_val  <- ifelse(value_interest != 'muM',200, 48)
-    muG_val<- ifelse(value_interest!= 'muG',log(2)/2.4,  4)
-    
+    alpha1_val <- ifelse(value_interest!= "alpha1", 1/2, 1 )
+    muM_val  <- ifelse(value_interest != 'muM', 200, 48) 
+
     PF_Time_Delayer <- ((10 * alpha1_val + (1 / 120))^10) / (10 *  alpha1_val )^10
     
     unique_B_V <- unique(x_list$B_V)
     unique_C_V <- unique(x_list$C_V)
     
-    rate =   PF_Time_Delayer * (1 - unique_C_V) * unique_B_V *
-      ((x_list[,"R"] *  pmax_val)/(( pmax_val * x_list[,"R"]) +  muM_val))    
+    rate =  PF_Time_Delayer * (1 - unique_C_V) * unique_B_V *
+      ((x_list[,"R"] *  pmax_val)/(( pmax_val * x_list[,"R"]) + muM_val))    
     
   }
   
@@ -147,12 +141,11 @@ Finder_RM <- function(x_list, species, criss_cross, value_interest) {
     
       truncate_G_TS <- G_TS_Function(seq(0,infection_length, 1/10))
       
-      
       fitness_func <- switch(species,
                              "PC" = PrI_PC,
                              "PF" = PrI_PF)
       
-      end_fitness_mort <-  sum(fitness_func (truncate_G_TS) * 1/10)
+      end_fitness_mort <-  sum(fitness_func(truncate_G_TS) * 1/10)
       
       df <- data.frame(
         endtime = infection_length,
@@ -204,53 +197,3 @@ Finder_RM <- function(x_list, species, criss_cross, value_interest) {
     return(df)
 }
  
-
-###For finding the durations across different lists
-
-Duration_Finder <- function(x_list, mu_M_c){
-  
-  tmp <- do.call(
-    rbind,
-    mclapply(x_list,
-             Finder_RM,
-             mu_M_c = mu_M_c,
-             mc.cores = 2))
-  
-  return(tmp)
-}
-
-
-#############
-###NO DEATH##
-#############
-Finder_RM_Nodeath <- function(x_list, mu_M_c) {
-
-    p =  4.0e-6
-    unique_B_V <- unique(x_list$B_V)
-    unique_C_V <- unique(x_list$C_V)
-    
-    rate = ((100* (1))/(100 + 0.025))^100*(1 - unique_C_V) * unique_B_V *
-      ((x_list[,"R"] * p)/((p * x_list[,"R"]) + mu_M_c))
-    
-    RM_time_df <-  cbind.data.frame(time = x_list[,'time'],
-                                    rate = rate, 
-                                    B_V = unique_B_V ,
-                                    C_V = unique_C_V)
-    
-    min_RM <- RM_time_df[which.min(RM_time_df$rate),]
-    
-    end_time <- subset(RM_time_df, 
-                       RM_time_df$time >= min_RM$time & 
-                         RM_time_df$rate >= 1)[1,'time']
-    
-    
-    df <- data.frame(
-      endtime =  end_time,
-      up_down =  'up',
-      end_fitness = NA,
-      status = 'success')
-    
-  
-  
-  return(df)
-}
