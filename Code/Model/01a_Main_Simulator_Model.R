@@ -10,6 +10,7 @@ library(here)
 # about the initial red blood cell density or the replenishment rate.
 # This is one of the longer code to source
 
+library(here)
 ### Packages to load
 source(here("Code", "Functions", "FUNC_Package_Loader.R"))
 
@@ -31,8 +32,8 @@ ifelse(dir.exists(here("Output/Fitness_Model")) == FALSE,
   "Directory exists already"
 )
 
-FULL_MODEL_PC <- FULL_MODEL_SIMULATING_Duration(4385.965,NA,"PC")
-FULL_MODEL_PF <- FULL_MODEL_SIMULATING_Duration(25000, NA, "PF")
+FULL_MODEL_PC <- FULL_MODEL_SIMULATING_Duration(4385.965,"PC", "No")
+FULL_MODEL_PF <- FULL_MODEL_SIMULATING_Duration(25000, "PF", "No")
 
 
 

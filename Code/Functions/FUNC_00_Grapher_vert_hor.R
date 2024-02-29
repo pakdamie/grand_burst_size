@@ -5,7 +5,7 @@ library(reshape2)
 
 grapher_mortality_boundary <- function (x){
   
-  tmp_df <- data.frame(B_V = x$R,
+  tmp_df <- data.frame(B_V = x$B_V,
                        C_V = x$C_V,
                        Status = x$status)
   
@@ -38,7 +38,12 @@ for (n in seq(1,nrow(tmp_mat_cast_mort))){
 }
 
 vert_seg_mort <- na.omit(do.call(rbind,vertical_df_mort))
+
+if(nrow(vert_seg_mort) != 0){
 vert_seg_mort$id = "mort"
+}else{
+  vert_seg_mort <- NA
+}
 
 ####################################
 ###Horizontal lines for mortality###
@@ -65,12 +70,18 @@ for (n in seq(1,ncol(tmp_mat_cast_mort))){
   
 }
 hor_seg_mort <- na.omit(do.call(rbind,horizontal_df_mort))
-hor_seg_mort$id <- 'mort'
+
+if(nrow(hor_seg_mort) != 0){
+  hor_seg_mort$id = "mort"
+}else{
+  hor_seg_mort <- NA
+}
+
 ################################
 ###Does not establish infection#
 ################################
 
-tmp_df <-    data.frame(B_V = as.factor(x$R),
+tmp_df <-    data.frame(B_V = as.factor(x$B_V),
                      C_V = as.factor(x$C_V),
                      Status = x$status)
 

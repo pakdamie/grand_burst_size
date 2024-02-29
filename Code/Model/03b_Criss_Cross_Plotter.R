@@ -1,4 +1,4 @@
-CRISS_CROSS_PLOT
+###CRISS_CROSS_PLOT
 
 ALL_OPT <- read.csv(here("Output","ALL_OPT.csv"))
 
@@ -11,17 +11,29 @@ Fitness_MODEL_PF <- read.csv(here(
   "FITNESS_MODEL_PF.csv"
 ))
 
+ 
+###THESE HAVE TO DO WITH THE UN-CRISS-CROSSED FITNESS DATAFRAME
 
-PC_CV_OPT <- subset(Fitness_MODEL_PC , Fitness_MODEL_PC $C_V == 0.76 &  Fitness_MODEL_PC $status == "success")
-PC_CV_OPT_Best <- PC_CV_OPT [which.max(PC_CV_OPT $end_fitness),][,c("end_fitness", "B_V")]
-PC_CV_OPT_Best$R <- PC_CV_OPT_Best$B_V
+###Find the optimal C_V and B_V
+PC_CV_optimal_CV <- Fitness_MODEL_PC[which.max(Fitness_MODEL_PC$end_fitness),]$C_V
+PC_CV_optimal_BV <- Fitness_MODEL_PC[which.max(Fitness_MODEL_PC$end_fitness),]$B_V
 
-PF_CV_OPT <- subset(Fitness_MODEL_PF , Fitness_MODEL_PF $C_V == 0.76 &  Fitness_MODEL_PF$status == "success")
-PF_CV_OPT_Best <- PF_CV_OPT [which.max(PF_CV_OPT $end_fitness),][,c("end_fitness", "B_V")]
-PF_CV_OPT_Best$R <- sqrt(PF_CV_OPT_Best$B_V)
+PC_CV_OPT_DF <- subset(Fitness_MODEL_PC , Fitness_MODEL_PC $C_V == PC_CV_optimal_CV  &  
+                      Fitness_MODEL_PC $status == "success")
+
+###Find the optimal C_V
+PF_CV_optimal_CV <- Fitness_MODEL_PF[which.max(Fitness_MODEL_PF$end_fitness),]$C_V
+PF_CV_optimal_BV <- sqrt(Fitness_MODEL_PF[which.max(Fitness_MODEL_PF$end_fitness),]$B_V)
+
+PF_CV_OPT_DF <-subset(Fitness_MODEL_PF , Fitness_MODEL_PF $C_V == PF_CV_optimal_CV  &  
+                        Fitness_MODEL_PF $status == "success")
+
+PC_Criss_Cross<- subset(ALL_OPT,ALL_OPT$species == "PC")
 
 
-PC_OPT <- subset(ALL_OPT,ALL_OPT$species == "PC")
+
+
+
 PC_OPT$fitness_percent_change <- ((PC_CV_OPT_Best$end_fitness-PC_OPT$end_fitness)/PC_OPT$end_fitness)*100
 PC_OPT$variable_interest <- factor(PC_OPT$variable_interest,
                                       levels =  PC_OPT$variable_interest[order(abs(PC_OPT$fitness_percent_change), decreasing= TRUE)])

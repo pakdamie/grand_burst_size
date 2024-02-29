@@ -31,38 +31,34 @@ source(here("Code", "Functions","PLOTTER_03_SurfacePlot_Maker.R"))
 ####################################################
 Fitness_MODEL_PC <- read.csv(here(
   "Output", "Fitness_Model",
-  "FITNESS_MODEL_PC.csv"
+  "FITNESS_MODEL_PCdeathNo.csv"
 ))
 Fitness_MODEL_PF <- read.csv(here(
   "Output", "Fitness_Model",
-  "FITNESS_MODEL_PF.csv"
+  "FITNESS_MODEL_PFdeathNo.csv"
 ))
-
-
 
 PC_GG_SurfacePlot <- MAIN_SURFACEPLOT_GG_GRAPHER_FIT(Fitness_MODEL_PC,"PC")
 PF_GG_SurfacePlot <- MAIN_SURFACEPLOT_GG_GRAPHER_FIT(Fitness_MODEL_PF ,"PF")
 
-
+PC_GG_SurfacePlot  + PF_GG_SurfacePlot 
 ###IF you want to see the optimal strategy (B_V/C_V)
 Best_Strategy_Finder(Fitness_MODEL_PC);#15.5, 0.76
-Best_Strategy_Finder(Fitness_MODEL_PF) #4.5 0.56
+Best_Strategy_Finder(Fitness_MODEL_PF) #17 0.48
 
 ### 
 Fitness_MODEL_PC_CV_OPT <- subset(Fitness_MODEL_PC, Fitness_MODEL_PC$C_V == 0.76)
 Fitness_MODEL_PC_CV_OPT$species <- "PC"
-Fitness_MODEL_PC_CV_OPT$R <- Fitness_MODEL_PC_CV_OPT$B_V
 
-Fitness_MODEL_PF_CV_OPT <- subset(Fitness_MODEL_PF, Fitness_MODEL_PF$C_V == 0.76)
+Fitness_MODEL_PF_CV_OPT <- subset(Fitness_MODEL_PF, Fitness_MODEL_PF$C_V == 0.48)
 Fitness_MODEL_PF_CV_OPT$species <- "PF"
-Fitness_MODEL_PF_CV_OPT$R <- sqrt(Fitness_MODEL_PF_CV_OPT$B_V)
 
 
 
 Fitness_MODEL_CV_OPT <- rbind.data.frame(Fitness_MODEL_PC_CV_OPT , Fitness_MODEL_PF_CV_OPT )
 
 ggplot(Fitness_MODEL_CV_OPT ,
-       aes(x = R, y = endtime + 0.05, 
+       aes(x =B_V, y = endtime + 0.05, 
            fill =status))+
          geom_density(stat='identity',outline.type = 'full')+
          facet_wrap(~species)+
@@ -80,7 +76,7 @@ ggplot(subset(Fitness_MODEL_CV_OPT ,
               Fitness_MODEL_CV_OPT$status == 'success'),
        aes(x = B_V, y = endtime + 0.05, 
            fill =species))+
-  geom_density(stat='identity',outline.type = 'full')+
+  geom_density(stat='identity',outline.type = 'full', alpha = 0.5)+
   scale_fill_manual(name = "",values = c('#4B878BFF','#D01C1FFF'))+
   xlab("Burst size")+
   ylab("Duration of acute phase")+

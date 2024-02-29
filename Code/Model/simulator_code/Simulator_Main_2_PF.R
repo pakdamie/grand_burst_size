@@ -19,7 +19,7 @@ sourceCpp(here("Code", "Model","rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 ###RBC, using the same proportion as the mouse data
 
 
-Simulator_Malaria_BC_PF <- function(B_V, C_V, initialvalue){
+Simulator_Malaria_BC_PF <- function(B_V, C_V, initialvalue,include_death){
   rootfun <- function (t, y, parms) {return(y['R'] - 380000)}
   
    parameters_n <- c(lambda = 2e5, # replenishment rate of RBC (#SimulatedTimeSeries.R)
@@ -53,14 +53,22 @@ Simulator_Malaria_BC_PF <- function(B_V, C_V, initialvalue){
   ### We just want to figure out when the peak infected RBC is at.
   times <- seq(0, 100, by = 1 / 10)
   
-  
-  out_DDE <- ode(
-    y = inits_n,
-    times = times,
-    func = Erlang_Malaria,
-    parms = parameters_n,
-    rootfun = rootfun)
-  
+  if(include_death == "No"){
+    
+    out_DDE <- ode(
+      y = inits_n,
+      times = times,
+      func = Erlang_Malaria,
+      parms = parameters_n)
+  }
+  else{
+    out_DDE <- ode(
+      y = inits_n,
+      times = times,
+      func = Erlang_Malaria,
+      parms = parameters_n,
+      rootfun = rootfun)
+  }
   return(data.frame(out_DDE[, c("time", "R", "G")], 
                     B_V = B_V, 
                     C_V = C_V,
@@ -114,8 +122,6 @@ Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V, initialvalue, endtime) {
     func = Erlang_Malaria_Cut,
     parms = parameters_n
   )
-  
-  
   
   
   return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V))

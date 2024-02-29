@@ -17,9 +17,7 @@ sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 ###This is the function that terminates the integrator early
 ### when the red blood cells reaches 6.5 * 10^5
 
-Simulator_Malaria_BC_PC <- function(B_V, C_V, initialvalue) {
-  
-  rootfun <- function (t, y, parms) {return(y['R'] - 6.5*10^5)}
+Simulator_Malaria_BC_PC <- function(B_V, C_V, initialvalue, include_death) {
   
   parameters_n <-
     c(lambda = 370000, # Replenishment rate of RBC (#SimulatedTimeSeries.R)
@@ -56,12 +54,25 @@ Simulator_Malaria_BC_PC <- function(B_V, C_V, initialvalue) {
   times <- seq(0, 100, by = 1 / 10)
   
   
+  rootfun <- function (t, y, parms) {return(y['R'] - 6.5*10^5)}
+  
+  if(include_death == "No"){
+  
   out_DDE <- ode(
     y = inits_n,
     times = times,
     func = Erlang_Malaria,
-    parms = parameters_n,
-    rootfun = rootfun)
+    parms = parameters_n)
+  }
+  else{
+    out_DDE <- ode(
+      y = inits_n,
+      times = times,
+      func = Erlang_Malaria,
+      parms = parameters_n,
+      rootfun = rootfun)
+  }
+  
   
  return(data.frame(out_DDE[, c("time", "R", "G")], 
                    B_V = B_V, 

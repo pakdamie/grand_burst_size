@@ -1,20 +1,12 @@
 
 MAIN_SURFACEPLOT_GG_GRAPHER_FIT <- function(x, species){
-  
-  if (species == "PC"){
-    x$R = x$B_V
-  }
-  else if (species == "PF"){
-    x$R = sqrt(x$B_V)
-  }
-  
-  ###Produces the mortality and non-establishing infection lines
+
+    ###Produces the mortality and non-establishing infection lines
   horizontal_vert_df <- grapher_mortality_boundary(x)
   
   ###Find the optimum_point-
   optimum_strategy <- x[which.max(x$end_fitness),]
   
-
 
   GG_Fitness_Cut_PC <-
     ggplot(
@@ -23,7 +15,7 @@ MAIN_SURFACEPLOT_GG_GRAPHER_FIT <- function(x, species){
         x$status !=
           "Fail"
       ),
-      aes(x = R, y = C_V)
+      aes(x = B_V, y = C_V)
     ) +
     geom_raster(aes(fill = end_fitness)) +
     geom_raster(
@@ -32,7 +24,7 @@ MAIN_SURFACEPLOT_GG_GRAPHER_FIT <- function(x, species){
         x$status ==
           "Fail"
       ),
-      aes(x = R,y = C_V), fill = "#d1dbe8"
+      aes(x = B_V,y = C_V), fill = "#d1dbe8"
     ) +
     geom_segment(
       data = horizontal_vert_df,
@@ -56,7 +48,7 @@ MAIN_SURFACEPLOT_GG_GRAPHER_FIT <- function(x, species){
     ) +
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
-    xlab(expression(paste("R"))) +
+    xlab(expression(paste("Burst size"))) +
     ylab("Transmission investment (c)") +
     theme(
       text = element_text(size = 14),
@@ -65,17 +57,17 @@ MAIN_SURFACEPLOT_GG_GRAPHER_FIT <- function(x, species){
       legend.position = "top"
     ) +
     geom_point(data = optimum_strategy ,
-               aes( x = R, y= C_V),
+               aes( x = B_V, y= C_V),
                color = '#FF116B', size = 2)+
     geom_segment(
       data = optimum_strategy,
       aes(
-        x = R, xend = R, y = 0.01, yend = C_V)
+        x = B_V, xend = B_V, y = 0.01, yend = C_V)
       , col = "#FF116B",
       linetype = 2) +
     geom_segment(data = optimum_strategy ,
                  aes(
-                   x =1, xend = R, y = C_V, yend = C_V), col = "#FF116B",
+                   x =1, xend = B_V, y = C_V, yend = C_V), col = "#FF116B",
                  linetype = 2) +
     
     annotate("text",

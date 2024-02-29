@@ -28,7 +28,7 @@ plasmodium_data_subsetted <- subset(subsetted_mal_dat,
                                      subsetted_mal_dat$Plasmodium.species %in%
                                        Plasmodium_Mal_Subset)
 plasmodium_data_subsetted $Type.Host <- add_underscore(
-  Plasmodium_data_subsetted $Type.Host)
+  plasmodium_data_subsetted $Type.Host)
 ###The type host tree 
 type_host_tree_subsetted <- keep.tip(Full_SuperTree_Host, 
               plasmodium_data_subsetted $Type.Host                      
