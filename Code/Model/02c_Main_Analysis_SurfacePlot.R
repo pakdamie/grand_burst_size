@@ -38,12 +38,10 @@ Fitness_MODEL_PF <- read.csv(here(
   "FITNESS_MODEL_PF.csv"
 ))
 
-
-
 PC_GG_SurfacePlot <- MAIN_SURFACEPLOT_GG_GRAPHER_FIT(Fitness_MODEL_PC,"PC")
 PF_GG_SurfacePlot <- MAIN_SURFACEPLOT_GG_GRAPHER_FIT(Fitness_MODEL_PF ,"PF")
 
-
+PC_GG_SurfacePlot  + PF_GG_SurfacePlot 
 ###IF you want to see the optimal strategy (B_V/C_V)
 Best_Strategy_Finder(Fitness_MODEL_PC);#15.5, 0.76
 Best_Strategy_Finder(Fitness_MODEL_PF) #4.5 0.56
