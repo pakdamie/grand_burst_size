@@ -1,7 +1,33 @@
-###LOOKING AT THE RM DIFFERENTIATOR
+###Why does increasing the length of the asexual cycle better?
+SIM_PC_Unchanged <- Simulator_Malaria_BC_PC (15.5,0.76,4385.965,"Yes")
+SIM_PC_Criss_Cross_alpha1 <- Simulator_PC_Criss_Cross("alpha1", 16,
+                                                         0.76, 
+                                                         0.58, 
+                                                         NA,
+                                                         4385.965,"Yes")
 
-SIM_PC <- Simulator_Malaria_BC_PC(15.5,0.76,4385.965)
-SIM_PF <- Simulator_Malaria_BC_PF(20.25,0.56,25000)
+
+lookit <- FULL_MODEL_SIMULATING_Duration_criss_cross('alpha1',  4385.965, NA, 0.76,0.58, 
+                                           NA, "PC", "Yes")
+
+
+plot(SIM_PC_Criss_Cross_alpha1 $time, SIM_PC_Criss_Cross_alpha1  $G,type ='l', col = 'red',ylim=c(0,200000))
+lines(SIM_PC_Unchanged$time, SIM_PC_Unchanged$G, type = 'l', ylim = c(0,200000))
+
+plot(SIM_PC_Criss_Cross_alpha1[,'time'],PrI_PC(SIM_PC_Criss_Cross_alpha1[,"G"]),type='l',col='red')
+lines(SIM_PC_Unchanged[,'time'],PrI_PC(SIM_PC_Unchanged[,"G"]),type='l')
+
+
+
+abline(v = 45, col = 'red')
+
+
+
+
+
+
+
+
 
 
 lines(SIM_PC[,'time'],RM_Calculator("PC",SIM_PC  ), col = '#4B878BFF',type = 'l', cex= 2, xlab = 'DPI',

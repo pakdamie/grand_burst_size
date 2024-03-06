@@ -31,11 +31,11 @@ source(here("Code", "Functions","PLOTTER_03_SurfacePlot_Maker.R"))
 ####################################################
 Fitness_MODEL_PC <- read.csv(here(
   "Output", "Fitness_Model",
-  "FITNESS_MODEL_PCdeathNo.csv"
+  "FITNESS_MODEL_PCdeathYes.csv"
 ))
 Fitness_MODEL_PF <- read.csv(here(
   "Output", "Fitness_Model",
-  "FITNESS_MODEL_PFdeathNo.csv"
+  "FITNESS_MODEL_PFdeathYes.csv"
 ))
 
 PC_GG_SurfacePlot <- MAIN_SURFACEPLOT_GG_GRAPHER_FIT(Fitness_MODEL_PC,"PC")

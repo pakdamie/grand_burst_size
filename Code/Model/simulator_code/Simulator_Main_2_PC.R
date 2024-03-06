@@ -64,7 +64,9 @@ Simulator_Malaria_BC_PC <- function(B_V, C_V, initialvalue, include_death) {
     func = Erlang_Malaria,
     parms = parameters_n)
   }
-  else{
+  
+  else if (include_death == "Yes"){
+
     out_DDE <- ode(
       y = inits_n,
       times = times,

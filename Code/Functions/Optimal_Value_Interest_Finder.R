@@ -7,10 +7,7 @@ Optimal_burst_size_finder <- function(x_dataframe, species){
   optimal_DF <- do.call(rbind,lapply(splitted_success_DF , function(x) x[which.max(x$end_fitness),]))
   optimal_DF$species <- species
   
-  optimal_DF["alpha1",]$B_V <- sqrt(  optimal_DF["alpha1",]$B_V )
-  
   return(optimal_DF)
-  
-  
+
   
 }

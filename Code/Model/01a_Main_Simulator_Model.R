@@ -20,7 +20,7 @@ sourceCpp(here("Code", "Model","rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 source(here("Code", "Model", "simulator_code", "Simulator_Main_2_PC.R"))
 source(here("Code", "Model", "simulator_code", "Simulator_Main_2_PF.R"))
 source(here("Code", "Functions", "FUNC_00_Fitness_Functions.R"))
-source(here("Code", "Functions", "FUNC_02_Simulator_Code.R"))
+source(here("Code", "Functions", "FUNC_Model_Simulator_Code.R"))
 
 ifelse(dir.exists(here("Output/Full_Model")) == FALSE,
   dir.create("Output/Full_Model"),
@@ -31,9 +31,8 @@ ifelse(dir.exists(here("Output/Fitness_Model")) == FALSE,
   dir.create("Output/Fitness_Model"),
   "Directory exists already"
 )
-
-FULL_MODEL_PC <- FULL_MODEL_SIMULATING_Duration(4385.965,"PC", "No")
-FULL_MODEL_PF <- FULL_MODEL_SIMULATING_Duration(25000, "PF", "No")
+Fitness_MODEL_PC  <- FULL_MODEL_SIMULATING_Duration(4385.965,"PC", "Yes")
+Fitness_MODEL_PF <- FULL_MODEL_SIMULATING_Duration(25000, "PF", "Yes")
 
 
 

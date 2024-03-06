@@ -44,7 +44,7 @@ Simulator_Malaria_BC_PF <- function(B_V, C_V, initialvalue,include_death){
   n1=parameters_n['n1'];
   n2=parameters_n['n2']
   
-  inits_n <- c(R =  5e6, 
+  inits_n <- c(R = 5e6, 
                I = rep(initialvalue/n1, n1),
                M = 0,
                IG=rep(0,n2),

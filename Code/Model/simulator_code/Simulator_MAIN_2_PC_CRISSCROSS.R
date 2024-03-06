@@ -25,7 +25,6 @@ Simulator_PC_Criss_Cross <- function(variable_interest,
   } else {
     C_V_val <- C_V_opt
   }
-  print(C_V_val)
   params_PC <- 
     c(lambda = 370000, # Replenishment rate of RBC (#SimulatedTimeSeries.R)
       K = 19968254, # Carrying capacity of RBC population in the absence of mortality
@@ -65,14 +64,14 @@ Simulator_PC_Criss_Cross <- function(variable_interest,
         y = inits_n,
         times = times,
         func = Erlang_Malaria,
-        parms = parameters_n)
+        parms = params_PC)
     }
     else{
       out_DDE <- ode(
         y = inits_n,
         times = times,
         func = Erlang_Malaria,
-        parms = parameters_n,
+        parms = params_PC,
         rootfun = rootfun)
     }
     

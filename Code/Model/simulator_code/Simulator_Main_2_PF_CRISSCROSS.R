@@ -68,21 +68,21 @@ Simulator_PF_Criss_Cross <- function(variable_interest,
       y = inits_n,
       times = times,
       func = Erlang_Malaria,
-      parms = parameters_n)
+      parms = params_PF)
   }
   else{
     out_DDE <- ode(
       y = inits_n,
       times = times,
       func = Erlang_Malaria,
-      parms = parameters_n,
+      parms = params_PF,
       rootfun = rootfun)
   }
   
 
   return(data.frame(out_DDE[, c("time", "R", "G")],
     B_V = B_V,
-    C_V = C_V_opt,
+    C_V =  C_V_val,
     initialvalue = initialvalue,
     infection_length =
       ifelse(!is.null(attributes(out_DDE)$troot),
@@ -157,5 +157,5 @@ Simulator_PF_Criss_Cross_Cut <- function(variable_interest, B_V, CV_PC,
     parms = params_PF
   )
 
-  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V_opt))
+  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V =  C_V_val))
 }

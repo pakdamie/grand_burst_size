@@ -35,6 +35,7 @@ PrI_PF <- function(gamDens) {
 ### Input: Data.frame of all the life-stages from the de-solve simulator #
 ### Output: The maximum cumulative transmission potential                #
 Gametocyte_Fitness <- function(x, species) {
+  
   gam_dat <- data.frame(
     time = x["time"],
     gam = x[, "G"]
@@ -52,6 +53,7 @@ Gametocyte_Fitness <- function(x, species) {
 
   return(end_fitness)
 }
+
 
 ### Calculate the RM
 RM_Calculator <- function(species, x_list) {
@@ -80,13 +82,12 @@ RM_Calculator <- function(species, x_list) {
 }
 
 
-RM_Calculator_Criss_Cross <- function(species, x_list, value_interest) {
+RM_Calculator_Criss_Cross <- function(species, x_list, variable_interest) {
+  
   if (species == "PC") {
-    pmax_val <- ifelse(value_interest != "pmax", 4.0e-6, 8.35e-6)
-    alpha1_val <- ifelse(value_interest != "alpha1", 1, 1 / 2)
-    muM_val <- ifelse(value_interest != "muM", 48, 200)
-
-
+    pmax_val <- ifelse(variable_interest != "pmax", 4.0e-6, 8.35e-6)
+    alpha1_val <- ifelse(variable_interest != "alpha1", 1, 1 / 2)
+    muM_val <- ifelse(variable_interest != "muM", 48, 200)
     PC_Time_Delayer <- ((100 * alpha1_val + (1 / 40))^100) / (100 * alpha1_val)^100
 
     unique_B_V <- unique(x_list$B_V)
@@ -94,10 +95,11 @@ RM_Calculator_Criss_Cross <- function(species, x_list, value_interest) {
 
     rate <- PC_Time_Delayer * (1 - unique_C_V) * unique_B_V *
       ((x_list[, "R"] * pmax_val) / ((pmax_val * x_list[, "R"]) + muM_val))
+    
   } else if (species == "PF") {
-    pmax_val <- ifelse(value_interest != "pmax", 8.35e-6, 4.0e-6)
-    alpha1_val <- ifelse(value_interest != "alpha1", 1 / 2, 1)
-    muM_val <- ifelse(value_interest != "muM", 200, 48)
+    pmax_val <- ifelse(variable_interest!= "pmax", 8.35e-6, 4.0e-6)
+    alpha1_val <- ifelse(variable_interest != "alpha1", 1 / 2, 1)
+    muM_val <- ifelse(variable_interest != "muM", 200, 48)
 
     PF_Time_Delayer <- ((10 * alpha1_val + (1 / 120))^10) / (10 * alpha1_val)^10
 
@@ -119,7 +121,8 @@ RM_Calculator_Criss_Cross <- function(species, x_list, value_interest) {
 Finder_RM <- function(x_list, species, criss_cross, variable_interest) {
   ### If it's NA that means that it never kills the host,
   ### If it's a numeric value, that means it kills the host.
-  infection_length <- unique(x_list$infection_length)
+ 
+   infection_length <- unique(x_list$infection_length)
 
   ### If the infection_length is NA.
   if (is.na(infection_length) == FALSE) {
@@ -153,6 +156,7 @@ Finder_RM <- function(x_list, species, criss_cross, variable_interest) {
       status = "mort"
     )
   } else {
+    
     unique_B_V <- unique(x_list$B_V)
     unique_C_V <- unique(x_list$C_V)
 
@@ -166,7 +170,7 @@ Finder_RM <- function(x_list, species, criss_cross, variable_interest) {
     if (criss_cross == "YES") {
       RM_time_df <- cbind.data.frame(
         time = x_list[, "time"],
-        rate = criss_cross_RM(species, x_list, value_interest),
+        rate = criss_cross_RM(species, x_list, variable_interest),
         B_V = unique_B_V,
         C_V = unique_C_V
       )
@@ -178,8 +182,6 @@ Finder_RM <- function(x_list, species, criss_cross, variable_interest) {
         C_V = unique_C_V
       )
     }
-
-
 
     min_RM <- RM_time_df[which.min(RM_time_df$rate), ]
 

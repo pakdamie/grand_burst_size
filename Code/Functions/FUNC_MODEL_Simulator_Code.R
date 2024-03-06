@@ -1,14 +1,12 @@
 ###########################################################
 ### THIS IS THE FUNCTION THAT SIMULATES INFECTIONS         #
 ### AND TELLS YOU THE FITNESS AT THE END OF THE ACUTE PHASE#
-###########################################################
-
+############################################################
 ### This calculates the initial RM that allows for the parasites
 ### to establish. Species include "PC" or "PF"
 ### indicate that the parameters are switched.
 
 Calculate_Initial_RM <- function(species) {
-  
   initial_RM_modifier <- 1.5 # The threshold for establishment.
   # If we're not criss-crossing the parameter values
 
@@ -104,7 +102,7 @@ FULL_MODEL_SIMULATING_Duration <- function(initial_value, species, include_death
   ### We can already take out parameter combinations that would not
   ### lead to the establishment of infection by looking at the initial
   ### RM threshold
-
+  
   RM_limit_1 <- Calculate_Initial_RM(species)
 
   ### If the replicative capacity (1-CV)B is greater than the RM threshold,
@@ -129,7 +127,7 @@ FULL_MODEL_SIMULATING_Duration <- function(initial_value, species, include_death
     c(B_V_C_V_F$B_V),
     c(B_V_C_V_F$C_V),
     c(B_V_C_V_F$initialvalue),
-    c("No"),
+    c(include_death),
     mc.cores = 3,
     SIMPLIFY = FALSE
   )
@@ -236,13 +234,14 @@ FULL_MODEL_SIMULATING_Duration <- function(initial_value, species, include_death
 
 ### SIMULATE The MODEL FOR CRISS_CROSSING FOR PLASMODIUM CHABAUDI OR
 ### PLASMODIUM FALCIPARUM
-FULL_MODEL_SIMULATING_Duration_criss_cross <- function(variable_interest = 'cv',
-                                                       initial_value = 4385.965,
-                                                       C_V_opt = NA,
-                                                       C_V_PC. =0.54,
-                                                       C_V_PF = 0.54,
+FULL_MODEL_SIMULATING_Duration_criss_cross <- function(variable_interest,
+                                                       initial_value,
+                                                       C_V_opt ,
+                                                       C_V_PC,
+                                                       C_V_PF,
                                                        id = NA,
-                                                       species = "PC") {
+                                                       species,
+                                                       include_death) {
 if (is.na(C_V_opt) == TRUE) {
     if (variable_interest != "cv") {
       C_V_val <- switch(species,
@@ -251,34 +250,18 @@ if (is.na(C_V_opt) == TRUE) {
       )
     } else if (variable_interest == "cv") {
       C_V_val <- switch(species,
-        "PC" =  C_V_PC,
-        "PF" =  C_V_PF
+        "PC" =  C_V_PF,
+        "PF" =  C_V_PC
       )
     }
 else{
     C_V_val = C_V_opt
 }
 }
-
-  R_0 <- seq(1, 50, 0.5) # BV
-
-  if (variable_interest == "alpha1") {
-    R_0_PC <- R_0^2 # For chabaudi (We're criss-crossing)
-    R_0_PF <- R_0
-  } else if (variable_interest != "alpha1") {
-    R_0_PC <- R_0 # For chabaudi
-    R_0_PF <- R_0^2
-  } # For falciparum
-
-
-  ### THE FIRST PART OF THE MODEL, trying to figure out what
-  ### parameter combinations we want to be looking at
+  
   ### Burst Size and Transmission Investment ###
+  B_V <-seq(1, 50, 0.5) # Burst size
 
-  B_V <- switch(as.character(species),
-    "PC"  =   R_0_PC,
-    "PF" =    R_0_PF
-  )
   # Different combinations
   B_V_C_V <- expand.grid(
     B_V = B_V,
@@ -291,9 +274,6 @@ else{
   ### lead to the establishment of infection
 
   RM_limit_1 <- Calculate_Initial_RM_CrissCross(species, variable_interest)
-
-
-
 
   B_V_C_V$Establish <- ifelse((1 - B_V_C_V$C_V) * B_V_C_V$B_V >= RM_limit_1,
     "Establish", "Fail"
@@ -317,6 +297,7 @@ else{
       c(C_V_PF),
       c(C_V_opt),
       c(B_V_C_V_F$initialvalue),
+      c(include_death),
       mc.cores = 3,
       SIMPLIFY = FALSE
     )
@@ -327,7 +308,7 @@ else{
     ### Write into a CSV TO BE SAVED
     write.csv(FULL_MODEL_DT, file = here(
       "Output", "Full_Model",
-      paste("FULL_MODEL_DT", species, variable_interest, ".csv", sep = "")
+      paste("FULL_MODEL_DT", species, variable_interest,include_death, ".csv", sep = "")
     ))
 
     ### REMOVE right now to save space
@@ -386,9 +367,6 @@ else{
       "PC" = Simulator_PC_Criss_Cross_Cut,
       "PF" = Simulator_PF_Criss_Cross_Cut
     )
-
-    print(Duration_Initial_SUCCESS$B_V)
-
     Fitness_MODEL <- mcmapply(model_sim_cut,
       c(variable_interest),
       c(Duration_Initial_SUCCESS$B_V),
@@ -416,7 +394,7 @@ else{
     ### Write into a CSV TO BE SAVED
     write.csv(Fitness_MODEL_FULL, file = here(
       "Output", "Fitness_Model",
-      paste("FITNESS_MODEL_", species, variable_interest, ".csv", sep = "")
+      paste("FITNESS_MODEL_", species, variable_interest,include_death ,".csv", sep = "")
     ))
 
 
