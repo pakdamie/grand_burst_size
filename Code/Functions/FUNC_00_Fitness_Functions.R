@@ -58,10 +58,10 @@ Gametocyte_Fitness <- function(x, species) {
 ### Calculate the RM
 RM_Calculator <- function(species, x_list) {
   time_delayer <- switch(species,
-    "PC" = (100 * (1))^100 / (100 * (1) + 0.025)^100,
-    "PF" = (10 * (1 / 2))^10 / (10 * (1 / 2) + (1 / 120))^10
+    "PC" = ((100 * (1))^100) / ((100 * (1) + 0.025))^100,
+    "PF" = ((10 * (1 / 2))^10 )/ ((10 * (1 / 2) + (1 / 120)))^10
   )
-
+  
   p_val <- switch(species,
     "PC" = 4.0e-6,
     "PF" = 8.35e-6
@@ -83,12 +83,11 @@ RM_Calculator <- function(species, x_list) {
 
 
 RM_Calculator_Criss_Cross <- function(species, x_list, variable_interest) {
-  
   if (species == "PC") {
     pmax_val <- ifelse(variable_interest != "pmax", 4.0e-6, 8.35e-6)
     alpha1_val <- ifelse(variable_interest != "alpha1", 1, 1 / 2)
     muM_val <- ifelse(variable_interest != "muM", 48, 200)
-    PC_Time_Delayer <- ((100 * alpha1_val + (1 / 40))^100) / (100 * alpha1_val)^100
+    PC_Time_Delayer <- ((100 * (alpha1_val))^100) / ((100 * (alpha1_val) + 0.025))^100
 
     unique_B_V <- unique(x_list$B_V)
     unique_C_V <- unique(x_list$C_V)
@@ -97,11 +96,11 @@ RM_Calculator_Criss_Cross <- function(species, x_list, variable_interest) {
       ((x_list[, "R"] * pmax_val) / ((pmax_val * x_list[, "R"]) + muM_val))
     
   } else if (species == "PF") {
+    
     pmax_val <- ifelse(variable_interest!= "pmax", 8.35e-6, 4.0e-6)
     alpha1_val <- ifelse(variable_interest != "alpha1", 1 / 2, 1)
     muM_val <- ifelse(variable_interest != "muM", 200, 48)
-
-    PF_Time_Delayer <- ((10 * alpha1_val + (1 / 120))^10) / (10 * alpha1_val)^10
+    PF_Time_Delayer <- ((10 * (alpha1_val))^10 )/ ((10 * (alpha1_val) + (1 / 120)))^10
 
     unique_B_V <- unique(x_list$B_V)
     unique_C_V <- unique(x_list$C_V)
@@ -202,3 +201,4 @@ Finder_RM <- function(x_list, species, criss_cross, variable_interest) {
 
   return(df)
 }
+

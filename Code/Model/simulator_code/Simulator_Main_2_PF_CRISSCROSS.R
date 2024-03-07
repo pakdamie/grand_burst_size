@@ -20,6 +20,9 @@ Simulator_PF_Criss_Cross <- function(variable_interest,
   muM_val <- ifelse(variable_interest != "muM", 200, 48)
   muG_val <- ifelse(variable_interest != "muG", log(2) / 2.4, 4)
 
+  
+  
+  
   if (is.na(C_V_opt) == TRUE) {
     C_V_val <- ifelse(variable_interest != "cv", CV_PF, CV_PC)
   } else {
@@ -44,7 +47,6 @@ Simulator_PF_Criss_Cross <- function(variable_interest,
     b = 0, # parameter associated with immune clearance (from Megan)
     q = 0 # Merozite interference (eyeballed graph from From American Naturalist- Greischar et al. 2014 )
   )
-
 
   n1 <- params_PF["n1"]
   ### The number of subcompartments for immature gametocytes
@@ -79,7 +81,6 @@ Simulator_PF_Criss_Cross <- function(variable_interest,
       rootfun = rootfun)
   }
   
-
   return(data.frame(out_DDE[, c("time", "R", "G")],
     B_V = B_V,
     C_V =  C_V_val,
