@@ -1,5 +1,5 @@
 #The parasite traits that we're interested in'
-
+library(here)
 source(here("Code","Model","simulator_code","Simulator_MAIN_2_PC_CRISSCROSS.R"))
 source(here("Code","Model","simulator_code","Simulator_MAIN_2_PF_CRISSCROSS.R"))
 sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_CUT.cpp"))
@@ -8,15 +8,14 @@ source(here("Code", "Functions", "FUNC_00_Fitness_Functions.R"))
 source(here("Code", "Functions", "FUNC_MODEL_Simulator_Code.R"))
 source(here("Code","Functions","Optimal_Value_Interest_Finder.R"))
 
-
+###These are the variables that we are interested in varying.
 variable_interest <- c('pmax','alpha1', 'alpha2','muM','muG', 'cv')
-
-
 initial_value_PC <- 4385.965
 C_V_PC <- 0.76
 C_V_PF <- 0.48
 id = NA
 species_PC = "PC"
+
 
 PC_Interest_Params <- data.frame(variable_interest = variable_interest,
                                   initial_value = initial_value_PC,
@@ -49,8 +48,6 @@ write.csv(FULL_MODEL_VALUE_INTEREST_PC_DT, file = "FULL_MODEL_VALUE_INTEREST_PC_
 
 ###
 
-
-
 initial_value_PF <- 25000
 species_PF = "PF"
 
@@ -81,10 +78,11 @@ FULL_MODEL_VALUE_INTEREST_PF_DT <- do.call(rbind,FULL_MODEL_VALUE_INTEREST_PF)
 write.csv(FULL_MODEL_VALUE_INTEREST_PF_DT, file = "FULL_MODEL_VALUE_INTEREST_PF_YesdeathDT.csv")
 
 
+###This checks for the optimal burst size 
 PC_OPT <- Optimal_burst_size_finder(as.data.frame(FULL_MODEL_VALUE_INTEREST_PC_DT), "PC")
 PF_OPT <- Optimal_burst_size_finder(FULL_MODEL_VALUE_INTEREST_PF_DT,"PF")
                           
-ALL_OPT <- rbind(PC_OPT, PF_OPT)
+ALL_OPT <- rbind(PC_OPT, PF_OPT) 
 
 write.csv(ALL_OPT ,here("Output","ALL_OPT.csv"))
 
