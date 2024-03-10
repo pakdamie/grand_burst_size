@@ -269,7 +269,7 @@ Simulator_PC_Criss_Cross_Two <- function(variable_interest_1,
 
 
 
-Simulator_PC_Criss_Cross_Cut <- function(variable_interest_1,
+Simulator_PC_Criss_Cross_Cut_Two <- function(variable_interest_1,
                                          variable_interest_2, 
                                          B_V, 
                                          CV_PC,
