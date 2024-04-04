@@ -19,11 +19,95 @@ vcv_Plasmodium <- vcv(compute.brlen(plasmodium_tree_full))
 vcv_TypeHost <- vcv(compute.brlen(type_host_tree_subsetted))
 
 
-###
+mal_dat_asex$obs <- seq(1, nrow(mal_dat_asex))
+mal_dat_asex$Host_name <- mal_dat_asex$Host
+mal_dat_asex$Parasite_name <- mal_dat_asex$Plasmodium_species
+
+
+######ECO + EVO 
+#model_null_ecophylo <- brm(
+#  Upper_Burst_Size ~ 1 +
+#    (1|(Parasite_name))+
+#    (1|(Host_name))+  
+#    (1|gr(Plasmodium_species , cov = vcv_Plasmodium))+
+#    (1|gr(Host , cov = vcv_TypeHost))+
+#    (1|obs),
+#  data = mal_dat_asex ,
+#  family = poisson, warmup = 4000,
+#  iter = 10000,
+#  control = list(adapt_delta = 0.99999, 
+#                 max_treedepth = 20),
+#  data2 = list(vcv_Plasmodium = vcv_Plasmodium,
+#               vcv_TypeHost = vcv_TypeHost))
+
+#model_null_ecophylo_no_obs <- brm(
+#  Upper_Burst_Size ~ 1 +
+#    (1|(Parasite_name))+
+#    (1|(Host_name))+  
+#    (1|gr(Plasmodium_species , cov = vcv_Plasmodium))+
+#    (1|gr(Host , cov = vcv_TypeHost)),
+#  data = mal_dat_asex ,
+#  family = poisson, warmup = 4000,
+#  iter = 10000,
+#  control = list(adapt_delta = 0.99999, 
+#                 max_treedepth = 20),
+#  data2 = list(vcv_Plasmodium = vcv_Plasmodium,
+#               vcv_TypeHost = vcv_TypeHost))
+
+#ABOVE HAVE NO DIFFERENCE
+
+###NO EVO 
+#model_null_nophylo <- brm(
+#  Upper_Burst_Size ~ 1 +
+#    (1|(Plasmodium_species))+
+#    (1|(Host))+ ,
+#  data = mal_dat_asex ,
+#  family = poisson, warmup = 4000,
+#  iter = 10000,
+#  control = list(adapt_delta = 0.99999, 
+#                 max_treedepth = 20),
+#  data2 = list(vcv_Plasmodium = vcv_Plasmodium,
+#               vcv_TypeHost = vcv_TypeHost))
 
 model_null <- brm(
   Upper_Burst_Size ~ 1 +
     (1|gr(Plasmodium_species , cov = vcv_Plasmodium))+
+    (1|gr(Host , cov = vcv_TypeHost))+,
+  data = mal_dat_asex ,
+  family = poisson, warmup = 4000,
+  iter = 10000,
+  control = list(adapt_delta = 0.99999, 
+                 max_treedepth = 20),
+  data2 = list(vcv_Plasmodium = vcv_Plasmodium,
+               vcv_TypeHost = vcv_TypeHost))
+
+#model_null_obs <- brm(
+#  Upper_Burst_Size ~ 1 +
+#    (1|gr(Plasmodium_species , cov = vcv_Plasmodium))+
+#    (1|gr(Host , cov = vcv_TypeHost))+
+#    (1|obs),
+#  data = mal_dat_asex ,
+#  family = poisson, warmup = 4000,
+#  iter = 10000,
+#  control = list(adapt_delta = 0.99999, 
+#                 max_treedepth = 20),
+#  data2 = list(vcv_Plasmodium = vcv_Plasmodium,
+#               vcv_TypeHost = vcv_TypeHost))
+###I DO NOT HAVE TO WORRY ABOUT OVERDISPERSION
+
+model_null_parasite_only <- brm(
+  Upper_Burst_Size ~ 1 +
+    (1|gr(Plasmodium_species , cov = vcv_Plasmodium)),
+  data = mal_dat_asex ,
+  family = poisson, warmup = 4000,
+  iter = 10000,
+  control = list(adapt_delta = 0.99999, 
+                 max_treedepth = 20),
+  data2 = list(vcv_Plasmodium = vcv_Plasmodium,
+               vcv_TypeHost = vcv_TypeHost))
+
+model_null_host_only <- brm(
+  Upper_Burst_Size ~ 1 +
     (1|gr(Host , cov = vcv_TypeHost)),
   data = mal_dat_asex ,
   family = poisson, warmup = 4000,
@@ -33,13 +117,72 @@ model_null <- brm(
   data2 = list(vcv_Plasmodium = vcv_Plasmodium,
                vcv_TypeHost = vcv_TypeHost))
 
+###USING THE VARIANCE - DECOMPOSITION (Hard to calculate the ICC)
+###EVIDENCE 1
+variance_decomposition(model_null) #This is saying that most of the model is explained
+                                   #by the random effects
+variance_decomposition(model_null, re_formula = ~(1|gr(Plasmodium_species , cov = vcv_Plasmodium)))
 
-check_model(model_null)
+###The total variance is conditioned on The random effect Plasmodium_species- we're excluding
+###the host random effect.
+variance_decomposition(model_null, re_formula = ~(1|gr(Host , cov = vcv_TypeHost))) #Includes 0 so not signifcant
 
-performance::variance_decomposition(model_null, re_formula =  
-                         ~(1|gr(Plasmodium_species , cov = vcv_Plasmodium)))
+###EVIDENCE 2
+variance_partition<- model_null%>% 
+  tidy_draws() %>% 
+  dplyr::select(starts_with("sd_")) %>%
+  transmute_all(.funs = list(sq = ~(. ^ 2))) %>% 
+  mutate(total_var = rowSums(.)) %>%
+  mutate_at(.vars = vars(-total_var), 
+            .funs = list(pct = ~(. / total_var)))  %>% 
+  map_df(.f = ~ median_hdci(., .width = 0.95), .id = "component") 
+  
+ggplot(variance_partition[4:5,], aes(x = y, y = component))+
+  geom_point(size =4) + geom_segment(aes(x = ymin, xend=ymax, y=component, 
+                                  yend=component))+
+  scale_y_discrete(label=c("Host","Plasmodium"))+theme_classic()+
+  xlab("Variance component")+
+  ylab("")+
+  theme(axis.text = element_text(size =14),
+        axis.title = element_text(size = 15))
 
-performance::variance_decomposition(model_null, re_formula =  
-                                      ~(1|gr(Hosts , cov = vcv_TypeHost)))
+###EVIDENCE 3
+fit1 <- add_criterion(model_null, "loo")
+fit2 <- add_criterion(model_null_parasite_only, "loo")
+fit3 <- add_criterion(model_null_host_only, "loo")
+loo_compare(fit1,fit2, fit3,criterion = "loo")
+
+###EVIDENCE 4
+bayes_R2(model_null)
+bayes_R2(model_null_parasite_only)
+bayes_R2(model_null_host_only)
+
+###EVIDENCE 5
+#Repeatability for Gaussian and non-Gaussian data: a practical guide 
+#for biologists by Shinichi Nakagawa, Holger Schielzeth
+
+Random_effect_H = 0.35^2
+Random_effect_P = 1.48^2
+B0 = 2.93
 
 
+
+Random_effect_H/(Random_effect_H + Random_effect_P + log(1/exp(B0)+1))
+Random_effect_P/(Random_effect_H + Random_effect_P + log(1/exp(B0)+1))
+
+
+###Hypothesis testing from BRMS - 
+
+
+hypothesis(
+  model_null,"(sd_Plasmodium_species__Intercept^2 )/
+  (sd_Host__Intercept^2 + sd_Plasmodium_species__Intercept^2 
+  + log(1/exp(b_Intercept)+1)) > 0 ", class = NULL)
+
+
+hypothesis(
+  model_null,"(sd_Host__Intercept^2 )/
+  (sd_Host__Intercept^2 + sd_Plasmodium_species__Intercept^2 
+  + log(1/exp(b_Intercept)+1)) > 0 ", class = NULL)
+
+###PARASITES PHYLOGENY MATTER MORE
