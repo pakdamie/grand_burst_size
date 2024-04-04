@@ -7,7 +7,6 @@ library(here)
 source(here("Code", "Functions", "FUNC_Package_Loader.R"))
 source(here("Code","Functions","FUNC_Merger_ParasiteTrait_HostPhylo.R"))
 source(here("Code","Functions","FUNC_util_remove_underscore.R"))
-source(here("Code", "Functions","FUNC_util_remove_underscore.R"))
 
 ###Host and Parasite data
 Malaria_Host_Dat <- read.csv(here("Data", "MALARIA_PAK_HOSTS.csv"))

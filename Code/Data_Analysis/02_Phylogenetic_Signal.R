@@ -1,64 +1,45 @@
 library(here)
-library(varde)
 source(here("Code","Functions", "FUNC_Package_Loader.R"))
 source(here("Code", "Data_Analysis","00_parasite_phylogeny_tree.R"))
 
-###Malaria Data - Species
-mal_dat_asex <- read.csv(here("Data","MALARIA_PAK_SPECIES.csv"))
+###Use the subsetted one
+mal_dat_asex <- read.csv(here("Data","MALARIA_PHYLOGENY_HOST_VARIOUS.csv"))
+mal_dat_asex$Host <- add_underscore(mal_dat_asex$Host)
 
 
-###Ensures that we're not lookingg at malaria species 
-mal_dat_asex <- subset(mal_dat_asex, mal_dat_asex$Include != "No")
+###Pruning down the host trees for the analysis as well as making the cophylogenetic
+###figure 
 
-###Subset the data
-subsetted_mal_dat <- mal_dat_asex [,c("Plasmodium.species",
-                                      "Average",
-                                      "Lower",
-                                      "Upper",
-                                      "Type.Host",
-                                      "OrderHost")]
+type_host_tree_subsetted <- drop.tip(Full_SuperTree_Host, 
+                                     Full_SuperTree_Host$tip.label
+                                     [-match(mal_dat_asex$Host, Full_SuperTree_Host$tip.label)])
 
-Plasmodium_Mal_Subset <- intersect(subsetted_mal_dat$Plasmodium.species, 
-                                   plasmodium_tree_full$tip.label)
-###The Plasmodium tree
-plasmodium_tree_subsetted <- keep.tip(plasmodium_tree_full,
-                                      Plasmodium_Mal_Subset)
-
-plasmodium_data_subsetted <- subset(subsetted_mal_dat, 
-                                     subsetted_mal_dat$Plasmodium.species %in%
-                                       Plasmodium_Mal_Subset)
-plasmodium_data_subsetted $Type.Host <- add_underscore(
-  plasmodium_data_subsetted $Type.Host)
-###The type host tree 
-type_host_tree_subsetted <- keep.tip(Full_SuperTree_Host, 
-              plasmodium_data_subsetted $Type.Host                      
-)
-
-vcv_Plasmodium <- vcv(compute.brlen(plasmodium_tree_subsetted))
+                                     
+vcv_Plasmodium <- vcv(compute.brlen(plasmodium_tree_full))
 vcv_TypeHost <- vcv(compute.brlen(type_host_tree_subsetted))
 
 
 ###
 
-plasmodium_data_subsetted$parasite_name <- plasmodium_data_subsetted$Plasmodium.species
-plasmodium_data_subsetted$host_name <- plasmodium_data_subsetted$Type.Host
-plasmodium_data_subsetted$observation <- seq(1, nrow(plasmodium_data_subsetted))
-
 model_null <- brm(
-  Upper ~ 1 +
-    (1|gr(Plasmodium.species , cov = vcv_Plasmodium))+
-    (1|gr(Type.Host , cov = vcv_TypeHost)),
-  data = plasmodium_data_subsetted ,
-  family = poisson,warmup = 4000,
+  Upper_Burst_Size ~ 1 +
+    (1|gr(Plasmodium_species , cov = vcv_Plasmodium))+
+    (1|gr(Host , cov = vcv_TypeHost)),
+  data = mal_dat_asex ,
+  family = poisson, warmup = 4000,
   iter = 10000,
-  control = list(adapt_delta = 0.99999, max_treedepth = 20),
+  control = list(adapt_delta = 0.99999, 
+                 max_treedepth = 20),
   data2 = list(vcv_Plasmodium = vcv_Plasmodium,
-               vcv_TypeHost = vcv_TypeHost ))
+               vcv_TypeHost = vcv_TypeHost))
+
+
+check_model(model_null)
 
 performance::variance_decomposition(model_null, re_formula =  
-                         ~(1|gr(Plasmodium.species , cov = vcv_Plasmodium)))
+                         ~(1|gr(Plasmodium_species , cov = vcv_Plasmodium)))
 
 performance::variance_decomposition(model_null, re_formula =  
-                                      ~(1|gr(Type.Host , cov = vcv_TypeHost)))
+                                      ~(1|gr(Hosts , cov = vcv_TypeHost)))
 
 

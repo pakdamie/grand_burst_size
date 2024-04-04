@@ -1,20 +1,21 @@
-###This script is to clean the data to make the large
-###burst size figure 
+###This script cleans the data to make the large
+###burst size figures.
+
 library(here)
 source(here("Code","Functions","FUNC_Order_Plasmodium_Host.R"))
-source(here("Code","Data_Analysis" ,"00_host_phylogeny_tree.R"))
+source(here("Code","Data_Analysis" ,"00_full_phylogeny_tree.R"))
+
 mal_dat <- read.csv(here("Data","MALARIA_PAK_SPECIES.csv"))
 
-###We need to get rid of circumflexum_1 get rid of (which is row 50) 
-###as it is a duplicate entry (two different asexual development time
-###was found)
+###We need to get rid of circumflexum_1 and
+### lophurae_1 as these are duplicate entries
+### (two different asexual development time
+### was found)
+ 
 mal_dat[mal_dat$Plasmodium.species %in%  c('circumflexum_2','lophurae_2'),] <- NA
 
-###No longer manually doing it with my own ordering, 
-###but with the phylo tree
-
 #Include = No is important! It means that the Plasmodium 
-#is not included ()
+#species is not included ()
 
 mal_avian <- subset(mal_dat, mal_dat$OrderHost == 'avian' &
                       mal_dat$Include != "No")
@@ -74,6 +75,7 @@ Ordered_Mam_Species$Plasmodium.species <- factor(Ordered_Mam_Species $Plasmodium
                                                  levels = Ordered_Mam_Species$Plasmodium.species )
 
 
+###Reptile
 ###Reptile and REP_Tree - look at the species not found in the tree
 mal_reptile$Type.Host <- sub(" ", "_", mal_reptile$Type.Host)
 
@@ -90,6 +92,6 @@ Ordered_rep_Species <- Ordering_PlasmodiumSP_Burst(mal_reptile,tip_name_rep )
 Ordered_rep_Species$Plasmodium.species <- factor(Ordered_rep_Species $Plasmodium.species,
                                                  levels = Ordered_rep_Species$Plasmodium.species )
 
-mal_reptile_order_1 <- Ordered_rep_Species[1:55,]
-mal_reptile_order_2 <- Ordered_rep_Species[56:111,]
+mal_reptile_order_1 <- Ordered_rep_Species[1:51,]
+mal_reptile_order_2 <- Ordered_rep_Species[52:103,]
 

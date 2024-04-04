@@ -7,16 +7,19 @@ Ordering_PlasmodiumSP_Burst <- function(malaria_dat, tip_names){
 
     for (host_species in seq(1,nrow(tip_names))){
         host_interest <- tip_names$label[[host_species]]
+        
         plas_interests <- subset(malaria_dat,
                                  malaria_dat$Type.Host == 
-                                   host_interest)[,c("Plasmodium.species","Forms",
+                                   host_interest)[,c("Plasmodium.species",
                                                      "Type.Host",
+                                                     "Family",
                                                      "Subgenus",
                                                      "Average", 
                                                      "Lower", 
                                                      "Upper")]
         
-        Ordered_Ave_Species <- plas_interests[order(plas_interests$Subgenus, plas_interests$Plasmodium.species),]
+        Ordered_Ave_Species <- plas_interests[order(plas_interests$Subgenus, 
+                               plas_interests$Plasmodium.species),]
         
         Order_list[[host_species]] <- Ordered_Ave_Species 
         
