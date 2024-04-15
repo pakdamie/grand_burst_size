@@ -15,14 +15,20 @@ Fitness_MODEL_PF <- read.csv(here(
 ###THESE HAVE TO DO WITH THE UN-CRISS-CROSSED FITNESS DATAFRAME
 
 ###Find the optimal C_V and B_V
+
+Fitness_MODEL_PC <- subset(Fitness_MODEL_PC ,Fitness_MODEL_PC $C_V== 0.10)
+
 PC_CV_optimal_CV <- Fitness_MODEL_PC[which.max(Fitness_MODEL_PC$end_fitness),]$C_V
 PC_CV_optimal_BV <- Fitness_MODEL_PC[which.max(Fitness_MODEL_PC$end_fitness),]$B_V
 PC_CV_optimal_fitness <- max(Fitness_MODEL_PC$end_fitness)
 
-PC_CV_OPT_DF <- subset(Fitness_MODEL_PC , Fitness_MODEL_PC $C_V == PC_CV_optimal_CV  &  
+PC_CV_OPT_DF <- subset(Fitness_MODEL_PC , Fitness_MODEL_PC $C_V == 0.10  &  
                       Fitness_MODEL_PC $status == "success")
 
 ###Find the optimal C_V
+
+Fitness_MODEL_PF <- subset(Fitness_MODEL_PF ,Fitness_MODEL_PF $C_V== 0.10)
+
 PF_CV_optimal_CV <- Fitness_MODEL_PF[which.max(Fitness_MODEL_PF$end_fitness),]$C_V
 PF_CV_optimal_BV <- Fitness_MODEL_PF[which.max(Fitness_MODEL_PF$end_fitness),]$B_V
 PF_CV_optimal_fitness <- max(Fitness_MODEL_PF$end_fitness)
@@ -75,7 +81,7 @@ PC_OPT_GG_BURST<-
   geom_hline(yintercept = PF_CV_optimal_BV , linetype = 2,color ="#D01C1FFF")+
   geom_segment(aes(x = variable_interest,
                    xend = variable_interest,
-                   y = 15.5,
+                   y = PC_CV_optimal_BV,
                    yend = B_V),
                    linewidth = 2,
                   color = "#4B878BFF")+
@@ -97,7 +103,7 @@ PF_OPT_GG_BURST<- ggplot(PF_Criss_Cross,
   geom_hline(yintercept = PF_CV_optimal_BV , linetype = 2,color ="#D01C1FFF")+
   geom_segment(aes(x = variable_interest,
                    xend = variable_interest,
-                   y = 17,
+                   y = PF_CV_optimal_BV,
                    yend = B_V),
                
                 color ="#D01C1FFF",

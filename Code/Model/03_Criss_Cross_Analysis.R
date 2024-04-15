@@ -11,8 +11,8 @@ source(here("Code","Functions","Optimal_Value_Interest_Finder.R"))
 ###These are the variables that we are interested in varying.
 variable_interest <- c('pmax','alpha1', 'alpha2','muM','muG', 'cv')
 initial_value_PC <- 4385.965
-C_V_PC <- 0.76
-C_V_PF <- 0.48
+C_V_PC <- 0.10
+C_V_PF <- 0.10
 id = NA
 species_PC = "PC"
 
@@ -44,7 +44,7 @@ FULL_MODEL_VALUE_INTEREST_PC <-  mcmapply(FULL_MODEL_SIMULATING_Duration_criss_c
 FULL_MODEL_VALUE_INTEREST_PC_DT <- do.call(rbind,FULL_MODEL_VALUE_INTEREST_PC)
 
 
-write.csv(FULL_MODEL_VALUE_INTEREST_PC_DT, file = "FULL_MODEL_VALUE_INTEREST_PC_YesdeathDT.csv")
+write.csv(FULL_MODEL_VALUE_INTEREST_PC_DT, file = "FULL_MODEL_VALUE_INTEREST_PC_YesdeathDT_CV_10.csv")
 
 ###
 
@@ -75,7 +75,7 @@ FULL_MODEL_VALUE_INTEREST_PF <-  mcmapply(FULL_MODEL_SIMULATING_Duration_criss_c
 FULL_MODEL_VALUE_INTEREST_PF_DT <- do.call(rbind,FULL_MODEL_VALUE_INTEREST_PF)
 
 
-write.csv(FULL_MODEL_VALUE_INTEREST_PF_DT, file = "FULL_MODEL_VALUE_INTEREST_PF_YesdeathDT.csv")
+write.csv(FULL_MODEL_VALUE_INTEREST_PF_DT, file = "FULL_MODEL_VALUE_INTEREST_PF_YesdeathDT_CV_10.csv")
 
 
 ###This checks for the optimal burst size 
@@ -84,6 +84,6 @@ PF_OPT <- Optimal_burst_size_finder(FULL_MODEL_VALUE_INTEREST_PF_DT,"PF")
                           
 ALL_OPT <- rbind(PC_OPT, PF_OPT) 
 
-write.csv(ALL_OPT ,here("Output","ALL_OPT.csv"))
+write.csv(ALL_OPT ,here("Output","ALL_OPT_CV_10.csv"))
 
           
