@@ -1,4 +1,4 @@
-#The parasite traits that we're interested in'
+#The parasite traits that we're interested in:
 library(here)
 source(here("Code","Model","simulator_code","Simulator_MAIN_2_PC_CRISSCROSS.R"))
 source(here("Code","Model","simulator_code","Simulator_MAIN_2_PF_CRISSCROSS.R"))
@@ -7,6 +7,7 @@ sourceCpp(here("Code", "Model","rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 source(here("Code", "Functions", "FUNC_00_Fitness_Functions.R"))
 source(here("Code", "Functions", "FUNC_MODEL_Simulator_Code.R"))
 source(here("Code","Functions","Optimal_Value_Interest_Finder.R"))
+
 
 ###These are the variables that we are interested in varying.
 variable_interest <- c('pmax','alpha1', 'alpha2','muM','muG', 'cv')

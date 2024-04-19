@@ -9,6 +9,29 @@ source(here("Code","Functions", "Package_Loader.R"))
 malaria_species_dat <- read.csv(here("Data","MALARIA_PAK_SPECIES.csv"))
 
 malaria_species_dat <- subset(malaria_species_dat ,malaria_species_dat $Include != "No")
+
+subsetted_malaria_dat <- malaria_species_dat[,c("Immature_RBC_Burst_Size_Average", "Mature_RBC_Burst_Size_Average", "Infectivity_Preference",
+                       "Plasmodium.species")]
+
+subsetted_melt <- melt(subsetted_malaria_dat, id.vars= c("Plasmodium.species","Infectivity_Preference"))
+
+
+ggplot(subsetted_melt, aes(x = variable, y= value,group =Plasmodium.species,
+                           color = Infectivity_Preference))+
+  geom_point(size = 3)+geom_line(size = 1.2)+xlab("Age of RBC")+ ylab("Average burst size")+
+  scale_x_discrete(label = c("Erythrocytes", "Normacytes"))+
+  scale_color_manual(values=c("black", "#5B84B1FF","#FC766AFF", 'grey'))+
+  theme_classic()+
+  theme(axis.text = element_text(size = 12, color = 'black'),
+        axis.title = element_text(size = 13, color = 'black'))
+
+
+ggsave(here("Figures", "Raw", "Age_preference.pdf"), units = 'in', 
+       height = 5, width = 8)
+
+
+
+
 ###Subset the data
 subsetted_mal_dat <-   malaria_species_dat[,c("Plasmodium.species",
                                   "Average",

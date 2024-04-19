@@ -58,107 +58,65 @@ model_null_ecophylo <- brm(
      prior = c( 
                 prior(student_t(3, 0,.05) ,"sd", lb = 0, ub = 4.5,  group = "Host" ),
                 prior(student_t(3, 0,.05) ,"sd", lb = 0, ub = 4.5, group = "Host_name" ),
-                prior(student_t(3, 1,.05) , "sd", lb = 0, ub = 4.5,  group = "Plasmodium_species"),
-                prior(student_t(3, 1,.05) ,"sd", lb = 0, ub = 4.5,  group = "Parasite_name"),
+                prior(student(3, 0,0.05), "sd", lb = 0, ub = 4.5, group = 'obs'),
+                prior(student_t(3, 1,.25) , "sd", lb = 0, ub = 4.5,  group = "Plasmodium_species"),
+                prior(student_t(3, 1,.25) ,"sd", lb = 0, ub = 4.5,  group = "Parasite_name"),
                 prior(student_t(3, 3, 2.5), "Intercept", lb = 0)),
   data = mal_dat_asex ,
   family = poisson, 
   warmup = 2000,
   iter = 10000,
   data2 = list(vcv_Plasmodium = vcv_Plasmodium,
-               vcv_TypeHost = vcv_TypeHost))
+               vcv_TypeHost = vcv_TypeHost),
+  save_pars = save_pars(all = TRUE))
 
-
+pairs(model_null_ecophylo)
 plot(model_null_ecophylo)
 
-check_
-loo_null_ecophylo <- loo(model_null_ecophylo)
+check_loo_null_ecophylo <- loo(model_null_ecophylo,reloo = TRUE)
+  plot(check_loo_null_ecophylo )
 
-#model_null_ecophylo_no_obs <- brm(
-#  Upper_Burst_Size ~ 1 +
-#    (1|(Parasite_name))+
-#    (1|(Host_name))+  
-#    (1|gr(Plasmodium_species , cov = vcv_Plasmodium))+
-#    (1|gr(Host , cov = vcv_TypeHost)),
-#  data = mal_dat_asex ,
-#  family = poisson, warmup = 4000,
-#  iter = 10000,
-
-#  control = list(adapt_delta = 0.99999, 
-#                 max_treedepth = 20),
-#  data2 = list(vcv_Plasmodium = vcv_Plasmodium,
-#               vcv_TypeHost = vcv_TypeHost))
-
-#ABOVE HAVE NO DIFFERENCE
-
-###NO EVO 
-#model_null_nophylo <- brm(
-#  Upper_Burst_Size ~ 1 +
-#    (1|(Plasmodium_species))+
-#    (1|(Host))+ ,
-#  data = mal_dat_asex ,
-#  family = poisson, warmup = 4000,
-#  iter = 10000,
-#  control = list(adapt_delta = 0.99999, 
-#                 max_treedepth = 20),
-#  data2 = list(vcv_Plasmodium = vcv_Plasmodium,
-#               vcv_TypeHost = vcv_TypeHost))
-
-
-###ISOLATE OUTLIER (probably P.giganteum)
-
-
-###TSUKUSHI - PROBLEM WITH THE MODEL. ###CHOOSE THE PRIORS- 
-### DEFAULT (REPORT THAT!)
-model_null <- brm(
+model_parasites_only_ecophylo <- brm(
   Upper_Burst_Size ~ 1 +
-    (1|gr(Plasmodium_species, cov = vcv_Plasmodium))+
-    (1|gr(Host, cov = vcv_TypeHost)),
+    (1|gr(Plasmodium_species , cov = vcv_Plasmodium))+
+    (1|Parasite_name) + 
+    (1|obs),
+  prior = c( 
+    prior(student_t(3, 1,.05) , "sd", lb = 0, ub = 4.5,  group = "Plasmodium_species"),
+    prior(student_t(3, 1,.05) ,"sd", lb = 0, ub = 4.5,  group = "Parasite_name"),
+    prior(student_t(3, 3, 2.5), "Intercept", lb = 0)),
   data = mal_dat_asex ,
-  family = poisson, warmup = 4000,
+  family = poisson, 
+  warmup = 2000,
   iter = 10000,
-  control = list(adapt_delta = 0.99999, 
-                 max_treedepth = 20),
   data2 = list(vcv_Plasmodium = vcv_Plasmodium,
-               vcv_TypeHost = vcv_TypeHost))
+               vcv_TypeHost = vcv_TypeHost),
+  save_pars = save_pars(all = TRUE))
 
 
-
-  #model_null_obs <- brm(
-#  Upper_Burst_Size ~ 1 +
-#    (1|gr(Plasmodium_species , cov = vcv_Plasmodium))+
-#    (1|gr(Host , cov = vcv_TypeHost))+
-#    (1|obs),
-#  data = mal_dat_asex ,
-#  family = poisson, warmup = 4000,
-#  iter = 10000,
-#  control = list(adapt_delta = 0.99999, 
-#                 max_treedepth = 20),
-#  data2 = list(vcv_Plasmodium = vcv_Plasmodium,
-#               vcv_TypeHost = vcv_TypeHost))
-###I DO NOT HAVE TO WORRY ABOUT OVERDISPERSION
-
-model_null_parasite_only <- brm(
+model_host_only_ecophylo <- brm(
   Upper_Burst_Size ~ 1 +
-    (1|gr(Plasmodium_species , cov = vcv_Plasmodium)),
-  data = mal_dat_asex ,
-  family = poisson, warmup = 4000,
-  iter = 10000,
-  control = list(adapt_delta = 0.99999, 
-                 max_treedepth = 20),
-  data2 = list(vcv_Plasmodium = vcv_Plasmodium,
-               vcv_TypeHost = vcv_TypeHost))
+    (1|gr(Host , cov = vcv_TypeHost))+
+    (1|Host_name)+
+    (1|obs),
+  prior = c( 
+    prior(student_t(3, 0,.05) ,"sd", lb = 0, ub = 4.5,  group = "Host" ),
+    prior(student_t(3, 0,.05) ,"sd", lb = 0, ub = 4.5, group = "Host_name" ),
 
-model_null_host_only <- brm(
-  Upper_Burst_Size ~ 1 +
-    (1|gr(Host , cov = vcv_TypeHost)),
+    prior(student_t(3, 3, 2.5), "Intercept", lb = 0)),
   data = mal_dat_asex ,
-  family = poisson, warmup = 4000,
-  iter = 10000,
-  control = list(adapt_delta = 0.99999, 
-                 max_treedepth = 20),
+  family = poisson, 
+  warmup = 2000,
+  iter = 15000,
   data2 = list(vcv_Plasmodium = vcv_Plasmodium,
-               vcv_TypeHost = vcv_TypeHost))
+               vcv_TypeHost = vcv_TypeHost),
+  save_pars = save_pars(all = TRUE))
+
+
+fit_orig <- add_criterion(model_null_ecophylo , "loo", reloo = TRUE)
+fit_par <- add_criterion(model_parasites_only_ecophylo, "loo",reloo = TRUE)
+fit_host <- add_criterion(model_host_only_ecophylo, "loo",reloo = TRUE)
+loo_compare(fit_orig,fit_par ,fit_host,criterion = "loo")
 
 
 ###RUN LOO 
@@ -202,7 +160,7 @@ ggplot(variance_partition[4:5,], aes(x = y, y = component))+
 
 ###EVIDENCE 3 (BAD!!!!)
 ###ADD TRULY NULL WITH NOTHINGGGGGG
-  fit1 <- add_criterion(model_null_ecophylo , "loo")
+fit1 <- add_criterion(model_null_ecophylo , "loo")
 fit2 <- add_criterion(model_null_parasite_only, "loo",moment_match = )
 fit3 <- add_criterion(model_null_host_only, "loo")
 loo_compare(fit1,fit2, fit3,criterion = "loo")

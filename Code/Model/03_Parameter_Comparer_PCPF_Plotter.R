@@ -1,8 +1,6 @@
 ###This is to make the schematic figure to show
 ###the difference between the P. falciparum and P. chabaudi 
 
-
-
 pmax_PCPF = c(PC = 4.0e-6, PF = 8.35e-6, variable = "Invasion rate")
 alpha1_PCPF <- c(PF= "1 day" , PF =  "2 day", variable = "Asexual cycle (days)") #EXPRESS IN DAYS 
 alpha2_PCPF <- c(PC = "2 day", PF =  "7 day" ,variable = "Sexual cycle (days)") #EXPRESS IN DAYS
