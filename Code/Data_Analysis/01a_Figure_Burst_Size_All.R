@@ -1,25 +1,23 @@
 ###This script cleans the data to make the large
-###burst size figures.
-
+###burst size Figure 1
 library(here)
 source(here("Code","Functions","FUNC_Order_Plasmodium_Host.R"))
 source(here("Code","Data_Analysis" ,"00_full_phylogeny_tree.R"))
-
 mal_dat <- read.csv(here("Data","MALARIA_PAK_SPECIES.csv"))
 
-###We need to get rid of circumflexum_1 and
-### lophurae_1 as these are duplicate entries
-### (two different asexual development time
-### was found)
- 
+### We need to get rid of circumflexum_1 and lophurae_1 as these are
+### duplicate entries (two different asexual development times
+### were found)
+
+###Insure that the entire rows are NA
 mal_dat[mal_dat$Plasmodium.species %in%  c('circumflexum_2','lophurae_2'),] <- NA
 
-#Include = No is important! It means that the Plasmodium 
-#species is not included ()
+#Include = No
+#Means that the Plasmodium species are not included ()
 
 mal_avian <- subset(mal_dat, mal_dat$OrderHost == 'avian' &
                       mal_dat$Include != "No")
-mal_mammal<- subset(mal_dat, mal_dat$OrderHost == 'mammal' &
+mal_mammal <- subset(mal_dat, mal_dat$OrderHost == 'mammal' &
                       mal_dat$Include != "No")
 mal_reptile <- subset(mal_dat, mal_dat$OrderHost == 'reptile' &
                       mal_dat$Include != "No")
@@ -27,9 +25,10 @@ mal_reptile <- subset(mal_dat, mal_dat$OrderHost == 'reptile' &
 ###Avian and consensus_AVE_Tree - look at the species not found in the tree
 mal_avian$Type.Host <- sub(" ", "_", mal_avian$Type.Host)
 #subset(mal_avian, !(mal_avian$Type.Host %in% consensus_AVE_Tree$tip.label))$Type.Host
+
 tip_name_ave <- ggtree(keep.tip(consensus_AVE_Tree, 
                                 mal_avian$Type.Host))[["data"]][,c('label','y')]
-
+###Ensure that the ordering is right.
 tip_name_ave <- tip_name_ave[order(tip_name_ave$y),]
 
 ###Gets rid of internal nodes
@@ -38,6 +37,7 @@ tip_name_ave <- subset(tip_name_ave, (tip_name_ave$y)%%1== 0 &
 Ordered_Ave_Species <- Ordering_PlasmodiumSP_Burst(mal_avian,tip_name_ave)
 Ordered_Ave_Species$Plasmodium.species <- factor(Ordered_Ave_Species$Plasmodium.species,
                                                   levels = Ordered_Ave_Species$Plasmodium.species )
+
 
 
 ###Mammal and MAM_Tree - look at the species not found in the tree
@@ -55,25 +55,6 @@ Ordered_Mam_Species <- Ordering_PlasmodiumSP_Burst(mal_mammal,tip_name_mam )
 
 Ordered_Mam_Species$Plasmodium.species <- factor(Ordered_Mam_Species $Plasmodium.species,
                                                  levels = Ordered_Mam_Species$Plasmodium.species )
-
-
-
-###Mammal and MAM_Tree - look at the species not found in the tree
-mal_mammal$Type.Host <- sub(" ", "_", mal_mammal$Type.Host)
-
-#subset(mal_mammal, !(mal_mammal$Type.Host %in% consensus_MAM_Tree$tip.label))$Type.Host
-
-tip_name_mam <- ggtree(keep.tip(consensus_MAM_Tree, 
-                                mal_mammal$Type.Host))[["data"]][,c('label','y')]
-tip_name_mam <- tip_name_mam[order(tip_name_mam$y),]
-tip_name_mam <- subset(tip_name_mam, tip_name_mam$y%%1== 0 &
-                         tip_name_mam$label != 1)
-
-Ordered_Mam_Species <- Ordering_PlasmodiumSP_Burst(mal_mammal,tip_name_mam)
-
-Ordered_Mam_Species$Plasmodium.species <- factor(Ordered_Mam_Species $Plasmodium.species,
-                                                 levels = Ordered_Mam_Species$Plasmodium.species )
-
 
 ###Reptile
 ###Reptile and REP_Tree - look at the species not found in the tree
@@ -95,3 +76,4 @@ Ordered_rep_Species$Plasmodium.species <- factor(Ordered_rep_Species $Plasmodium
 mal_reptile_order_1 <- Ordered_rep_Species[1:51,]
 mal_reptile_order_2 <- Ordered_rep_Species[52:103,]
 
+###Proceed to 01b_ Figure_Burst_Size_All.R
