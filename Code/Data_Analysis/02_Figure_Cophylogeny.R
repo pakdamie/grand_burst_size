@@ -1,7 +1,7 @@
 library(here)
 source(here("Code", "Functions", "FUNC_Package_Loader.R"))
 source(here("Code", "Data_Analysis", "00_parasite_phylogeny_tree.R"))
-
+source(here("Code", "Data_Analysis","00_full_phylogeny_tree.R"))
 
 ### Use the subsetted one
 mal_dat_asex <- read.csv(here("Data", "MALARIA_PHYLOGENY_HOST_VARIOUS.csv"))
@@ -9,6 +9,18 @@ mal_dat_asex$Host <- add_underscore(mal_dat_asex$Host)
 
 
 association_matrix <- mal_dat_asex[, c("Plasmodium_species", "Host", "Upper_Burst_Size")]
+
+maximum_by_parasite <- do.call(rbind,(by(association_matrix,association_matrix$Plasmodium_species, 
+                       function(x) max(x$Upper_Burst_Size),
+                       simplify = FALSE)))
+
+maximum_by_parasite_DF <- cbind.data.frame(maximum_by_parasite,row.names(maximum_by_parasite))
+
+maximum_by_host <- do.call(rbind,(by(association_matrix,association_matrix$Host, 
+                                 function(x) max(x$Upper_Burst_Size),
+                                 simplify = FALSE)))
+maximum_by_host_DF <- cbind.data.frame(maximum_by_host,row.names(maximum_by_host))
+
 
 
 ### Pruning down the host trees for the analysis as well as making the cophylogenetic
@@ -24,7 +36,8 @@ plot(cophylo(
   plasmodium_tree_full,
   type_host_tree_subsetted,
   association_matrix
-), rotate = TRUE, use.edge.length = FALSE)
+), rotate = TRUE, use.edge.length = FALSE,
+tip.color='green')
 
 ### THIS REQUIRES A LOT OF MANUAL EDITING IN ILLUSTRATOR
 

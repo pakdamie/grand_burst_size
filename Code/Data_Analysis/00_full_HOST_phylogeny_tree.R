@@ -1,12 +1,12 @@
-### Cleaning up the phylogeny for the mammal, avian, and reptile
-### hosts as well as including the pertinent data. This script
-### is specifically for cleaning up the host phylogeny data
-### without thinking about the parasites for modularity 
+###@ 00_full_phylogeny_tree.R
+
+### This is the full phylogeny for the mammal, avian, and reptile
+### hosts. This script is specifically for cleaning up the host phylogeny 
+### data.
 
 library(here)
 source(here("Code","Functions","FUNC_Package_Loader.R"))
 source(here("Code","Functions","FUNC_util_remove_underscore.R"))
-source(here("Code","Functions","FUNC_Identifier_Burst_Size_Order.R"))
 
 ###REPTILE
 REP_Phylo <- read.nexus(here('Data',"Reptile","reptile_phylo_1000.nex")) 
@@ -32,8 +32,6 @@ consensus_AVE_Tree <- multi2di(consensus_AVE_Tree, random = TRUE)
 consensus_REP_Tree <- multi2di(consensus_REP_Tree, random = TRUE)
 consensus_MAM_Tree <- multi2di(consensus_MAM_Tree, random = TRUE)
 
-
-
 ###THIS PART IS FOR CREATING A SUPER TREE that
 ###has both reptile, mammal, and avian hosts.
 
@@ -52,14 +50,13 @@ Nnode <-2
 ordertree <- list(edge=edge, Nnode=Nnode, tip.label=tip.labels )
 class(ordertree) <- 'phylo'
 
-###
+###We then graft the individual clades into the supertree, one by one
 
 tree_list <- list(squam=consensus_REP_Tree, 
                   birds=consensus_AVE_Tree, 
                   mam= consensus_MAM_Tree)
 
 class(tree_list) <- "multiPhylo"
-
 
 
 
@@ -72,6 +69,7 @@ Order_2_Reptile_Avian  <- bind.tree(x = Order_1_Reptile,
                                     where = 2, 
                                     interactive = FALSE)
 
+###This is the full super-tree that will be used for all analyses.
 Full_SuperTree_Host <- bind.tree(x = Order_2_Reptile_Avian , 
                                  y = consensus_MAM_Tree, 
                                  where = 1, 

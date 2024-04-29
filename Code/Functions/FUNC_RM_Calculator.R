@@ -86,6 +86,11 @@ RM_Calculator_Criss_Cross <- function(species, x_list, variable_interest) {
     PC_Time_Delayer <- ((100 * (alpha1_val))^100) / ((100 * (alpha1_val) + 0.025))^100
 
     unique_B_V <- unique(x_list$B_V)
+    
+    if (length(unique_BV) > 1) {
+      stop("Ensure that each list element is unique!")
+    }
+    
     unique_C_V <- unique(x_list$C_V)
 
     rate <- PC_Time_Delayer * (1 - unique_C_V) * unique_B_V *
@@ -106,6 +111,11 @@ RM_Calculator_Criss_Cross <- function(species, x_list, variable_interest) {
     ### Transmission investment
     unique_C_V <- unique(x_list$C_V)
 
+    
+    if (length(unique_C_V) > 1) {
+      stop("Ensure that each list element is unique!")
+    }
+    
     if (length(unique_C_V) > 1) {
       stop("Ensure that each list element is unique!")
     }
