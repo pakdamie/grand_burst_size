@@ -1,5 +1,4 @@
-
-### This is the full figure for making the cophylogeny plot 
+### This is the script for making the full figure for making the cophylogeny plot 
 ### between host and parasites (Figure 2) 
 
 library(here)
