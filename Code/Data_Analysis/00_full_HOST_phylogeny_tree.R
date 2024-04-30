@@ -1,12 +1,8 @@
-###@ 00_full_phylogeny_tree.R
+###@ 00_full_HOST_phylogeny_tree.R
 
 ### This is the full phylogeny for the mammal, avian, and reptile
 ### hosts. This script is specifically for cleaning up the host phylogeny 
 ### data.
-
-library(here)
-source(here("Code","Functions","FUNC_Package_Loader.R"))
-source(here("Code","Functions","FUNC_util_remove_underscore.R"))
 
 ###REPTILE
 REP_Phylo <- read.nexus(here('Data',"Reptile","reptile_phylo_1000.nex")) 

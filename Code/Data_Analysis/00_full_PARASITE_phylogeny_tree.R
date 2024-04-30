@@ -4,8 +4,6 @@
 ### This script is specifically for cleaning up the Plasmoidum phylogeny 
 ### data.
 
-library(here)
-source(here("Code","Functions","FUNC_Package_Loader.R"))
 source(here("Code", "Functions","FUNC_renamer_label.R"))
 
 ###Loading in the malaria parasite data (parasite_dat)
