@@ -1,11 +1,21 @@
-
 ###Model checking:
 pp_check(fit_model_ecophylo,type= "intervals",ndraws= 1000)
 
 ###R2 check
 bayes_R2(fit_model_ecophylo)
 coef(fit_model_ecophylo)
-coefplot(fit_model_ecophylo)
+forest(fit_model_ecophylo, grouping = "Parasite_name")
+forest(fit_model_ecophylo, grouping = "Host")
+forest(fit_model_ecophylo, grouping = "Host_name")
+forest(fit_model_ecophylo, grouping = "Plasmodium_species")
+
+df_random <- data.frame(ranef(fit_model_ecophylo)$Parasite_name)[,1]
+coef(fit_model_ecophylo)$Parasite_name
+fixef(fit_model_ecophylo)
+
+exp(df_random + 2.932283)
+
+exp(4)
 x`###
 data.frame_Intercept <- data.frame(coef(fit_model_ecophylo)[[5]])
 data.frame_Intercept$Species <- rownames(data.frame_Intercept)
@@ -40,14 +50,19 @@ ggplot(variance_partition[4:5,], aes(x = y, y = component))+
 #Repeatability for Gaussian and non-Gaussian data: a practical guide 
 #for biologists by Shinichi Nakagawa, Holger Schielzeth
 
-Random_effect_H = 0.35^2
-Random_effect_P = 1.48^2
+Random_effect_HName = 0.09 ^2
+Random_effect_HPhy =  0.08^2
+Random_effect_PName =  0.48^2
+Random_effect_PPhy =  0.13^2
+Random_effect_obs =  0.06^2
 B0 = 2.93
 
 
 ###Frequentist methodddd
-Random_effect_H/(Random_effect_H + Random_effect_P + log(1/exp(B0)+1))
-Random_effect_P/(Random_effect_H + Random_effect_P + log(1/exp(B0)+1))
+Random_effect_HName/(Random_effect_HName+ Random_effect_HPhy + Random_effect_PName + Random_effect_PPhy + Random_effect_obs+ log(1/exp(B0)+1))
+Random_effect_HPhy /(Random_effect_HName+ Random_effect_HPhy + Random_effect_PName + Random_effect_PPhy + Random_effect_obs+ log(1/exp(B0)+1))
+Random_effect_PName /(Random_effect_HName+ Random_effect_HPhy + Random_effect_PName + Random_effect_PPhy + Random_effect_obs+ log(1/exp(B0)+1))
+Random_effect_PPhy/(Random_effect_HName+ Random_effect_HPhy + Random_effect_PName + Random_effect_PPhy + Random_effect_obs+ log(1/exp(B0)+1))
 
 
 ###Hypothesis testing from BRMS - 
