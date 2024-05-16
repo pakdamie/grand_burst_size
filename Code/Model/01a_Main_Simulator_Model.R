@@ -13,10 +13,7 @@ library(here)
 library(here)
 ### Packages to load
 source(here("Code", "Functions", "FUNC_Package_Loader.R"))
-
 ### Main modeling code
-sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_CUT.cpp"))
-sourceCpp(here("Code", "Model","rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 source(here("Code", "Model", "simulator_code", "Simulator_Main_2_PC.R"))
 source(here("Code", "Model", "simulator_code", "Simulator_Main_2_PF.R"))
 source(here("Code", "Functions", "FUNC_00_Fitness_Functions.R"))

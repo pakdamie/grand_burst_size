@@ -16,3 +16,4 @@ type_host_tree_subsetted <- drop.tip(Full_SuperTree_Host,
 ###The large malaria dataset
 mal_dat_asex_full <- read.csv(here("Data","MALARIA_PAK_SPECIES.csv"))
 mal_dat_asex_full <- subset(mal_dat_asex_full, mal_dat_asex_full$Include != "No")
+mal_dat_asex_full$Type_Host <- add_underscore(mal_dat_asex_full$Type_Host)

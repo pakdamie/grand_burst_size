@@ -1,22 +1,28 @@
-###Model checking:
-pp_check(fit_model_ecophylo,type= "intervals",ndraws= 1000)
+load(here("Output", "brms_output", "fit_model_ecophylo.RData"))
+load(here("Output", "brms_output", "fit_model_host_only.RData"))
+load(here("Output", "brms_output", "fit_model_parasite_only.RData"))
 
-###R2 check
-bayes_R2(fit_model_ecophylo)
-coef(fit_model_ecophylo)
-forest(fit_model_ecophylo, grouping = "Parasite_name")
-forest(fit_model_ecophylo, grouping = "Host")
-forest(fit_model_ecophylo, grouping = "Host_name")
-forest(fit_model_ecophylo, grouping = "Plasmodium_species")
+fit_model_ecophylo_draws <- gather_draws(fit_model_ecophylo,
+               sd_Host__Intercept,
+               sd_Host_name__Intercept,
+               sd_Parasite_name__Intercept,
+               sd_Plasmodium_species__Intercept,
+               ndraws = 8000)
 
-df_random <- data.frame(ranef(fit_model_ecophylo)$Parasite_name)[,1]
-coef(fit_model_ecophylo)$Parasite_name
-fixef(fit_model_ecophylo)
+fit_draws_GG <- ggplot(fit_model_ecophylo_draws,aes(x = (.variable), y= .value)) +
+  stat_pointinterval(  .width = c(0.5, 0.95),
+                       point_size = 10) + theme_classic() + 
+  xlab("")+ ylab("Coefficient estimate")+
+  scale_x_discrete(label = c(
+                             "Parasite identity",
+                             "Parasite phylogeny",
+                             "Host identity", "
+                             Host phylogeny"))
+  
+ggsave(here("Figures", "Raw", "fit_draws_GG.pdf"), width = 11,
+       height =3, units = 'in')
 
-exp(df_random + 2.932283)
 
-exp(4)
-x`###
 data.frame_Intercept <- data.frame(coef(fit_model_ecophylo)[[5]])
 data.frame_Intercept$Species <- rownames(data.frame_Intercept)
 

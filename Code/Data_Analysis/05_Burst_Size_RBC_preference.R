@@ -1,91 +1,211 @@
-###This script is to plot and explore if there is any 
-###relationship with the upper burst size and
-###RBC_preference
+###This script is to plot the facet and show that there is
+### a lot of confusion when it comes to talk about RBC tropism.
 
 library(here)
-source(here("Code","Functions", "FUNC_Package_Loader.R"))
+source(here("Code","Functions","FUNC_full_data_loader.R"))
 
-###Malaria Data - Species
-malaria_species_dat <- read.csv(here("Data","MALARIA_PAK_SPECIES.csv"))
-malaria_species_dat <- subset(malaria_species_dat ,malaria_species_dat $Include != "No")
-malaria_species_dat2 <- read.csv(here("Data", "MALARIA_PHYLOGENY_HOST_VARIOUS.csv"))
-burst_size_Chabaudi <- read.csv(here("Data","Chabaudi_Burst_Sizediff.csv"))
-
-subsetted_malaria_dat <- malaria_species_dat[,c("Immature_RBC_Burst_Size_Average",
-                                                "Mature_RBC_Burst_Size_Average",
-                                                "Infectivity_Preference",
-                                                "Plasmodium.species")]
-
-
-
-subsetted_malaria_dat2 <- na.omit(malaria_species_dat2[,c("Immature_BS_Average",
-                                                 "Mature_BS_Average",
-                                                 "Preference",
-                                                 "Plasmodium_species")])
-
-colnames(subsetted_malaria_dat2 ) <- c("Immature_Average", 
-                                       "Mature_Average", 
-                                       "Preference",
-                                       "Species")
 ###I need to use the subsetted_malaria_dat_2 to add stuff into
+subsetted_preference_dat <- mal_dat_asex_full[,c("Plasmodium.species","Type_Host",
+                                                 "Known_Preference","Inferred_Preference",
+                                                 "Higher.burst.size.in", "Infectivity_note")]
 
-subsetted_malaria_dat <- na.omit(subsetted_malaria_dat)
-
-###Azurophilum is included so remove that
-subsetted_malaria_dat <- subset(subsetted_malaria_dat,
-                                subsetted_malaria_dat$Plasmodium.species != 'azurophilum')
-
-
-colnames(subsetted_malaria_dat  ) <- c("Immature_Average", 
-                                       "Mature_Average", 
-                                       "Preference",
-                                       "Species")
+###Get rid of circumflexum and lophurae
 
 
 
-burst_size_Chabaudi$Preference = "All"
-subsetted_chabaudi <- burst_size_Chabaudi[c(1:2),c("Retic","Mature", "Preference","Species")]
-colnames(subsetted_chabaudi ) <-  c("Immature_Average", 
-                                       "Mature_Average", 
-                                       "Preference",
-                                       "Species")
+###Get only the data where there is some information about the preference
+subsetted_preference_dat <- subset(subsetted_preference_dat,
+                                  is.na(subsetted_preference_dat$Known_Preference) == FALSE &
+                                    !(subsetted_preference_dat$Plasmodium.species %in% c("lophurae_2", "circumflexum_2")))
 
-Full_Data_Preference <- rbind(subsetted_malaria_dat,
-                              subsetted_malaria_dat2,
-                              subsetted_chabaudi)
+pruned.tree <-drop.tip(Full_SuperTree_Host,
+                       setdiff(Full_SuperTree_Host$tip.label, 
+                        unique(subsetted_preference_dat$Type_Host)))
 
 
-Full_Data_Preference [Full_Data_Preference $Preference=="UNKNOWN",]$Preference = "Unknown"
+pruned.tree_host_order <- cbind.data.frame(order = seq(1,length(pruned.tree $tip.label)),Type_Host = pruned.tree $tip.label)
+
+ordered_pruned_dat <- left_join(subsetted_preference_dat , pruned.tree_host_order )
+
+ordered_pruned_dat$Plasmodium.species <- factor(ordered_pruned_dat$Plasmodium.species ,
+                                                   levels = c(ordered_pruned_dat$Plasmodium.species[order(ordered_pruned_dat$order)]))
+                                                   
+ordered_pruned_dat$facet_var <-ifelse(ordered_pruned_dat$order > 33, 2,1)
 
 
 
-Full_Data_Preference$obs <- seq(1,nrow(Full_Data_Preference ))
-Full_Data_Preference_Melted <- melt(Full_Data_Preference,
-                                   id.vars=list("Species","Preference",'obs'))
+ordered_pruned_dat$point1 <- NA
+ordered_pruned_dat$point2 <- NA
+ordered_pruned_dat$colortriangle1 <- NA
+ordered_pruned_dat$colortriangle2 <- NA
 
 
-Preference_GG <- ggplot(Full_Data_Preference_Melted, aes(x = variable, 
-                           y= value,
-                           group =obs))+
-  geom_line(aes(linetype = Preference,
-                linewidth = Preference,
-                color = Preference))+
-  geom_point(aes(color = Preference))+
-  xlab("Age of RBC")+ ylab("Average burst size")+
-  scale_x_discrete(label = c("Erythrocytes", "Normacytes"))+
-  scale_linetype_manual(values=c("dashed","longdash", "dotted",  "solid"))+
-  scale_color_manual(values= c("black","black","black","grey"))+
-  scale_linewidth_manual(values = c(1.1,1.1,1.1,0.76))+
+
+only_conflict_df <-  subset(ordered_pruned_dat, ordered_pruned_dat$Known_Preference %in% c("Conflict(All,Immature)*",
+                                                                                           "Conflict(All,Mature)*", "Conflict(All,Mature)",
+                                                                                           "Conflict(All;Mature)",
+                                                                                           "Conflict(Immature,Mature)*", 
+                                                                                           "Conflict(Immature,Mature)") |
+                              ordered_pruned_dat$Inferred_Preference %in% c("Conflict(All,Immature)*",
+                                                                         "Conflict(All,Mature)*", "Conflict(All,Mature)",
+                                                                         "Conflict(Immature,Mature)*", 
+                                                                         "Conflict(Immature,Mature)") )
+non_conflict_df <- subset(ordered_pruned_dat, !(ordered_pruned_dat$Plasmodium.species %in% only_conflict_df$Plasmodium.species))
+  
+  
+
+
+
+
+meltedconflict_df <- melt(only_conflict_df[,-6], id.vars = c("Plasmodium.species", "Type_Host", "order", "facet_var"))
+meltedconflict_df$point1 <- "Square"
+meltedconflict_df$point2 <- "Square"
+meltedconflict_df$color1 <- NA
+meltedconflict_df$color2 <- NA
+
+
+meltedconflict_df[meltedconflict_df$value == "Conflict(All,Immature)*",]$point1 <- "a"
+meltedconflict_df[meltedconflict_df$value == "Conflict(All,Immature)*",]$color1 <- "Immature"
+
+meltedconflict_df[meltedconflict_df$value == "Conflict(All,Immature)*",]$point2 <- "b"
+meltedconflict_df[meltedconflict_df$value == "Conflict(All,Immature)*",]$color2 <- "All"
+
+meltedconflict_df[meltedconflict_df$value %in% c("Conflict(All,Mature)*", "Conflict(All,Mature)"),]$point1 <- "a"
+meltedconflict_df[meltedconflict_df$value %in% c("Conflict(All,Mature)*", "Conflict(All,Mature)"),]$color1 <- "Mature"
+
+meltedconflict_df[meltedconflict_df$value %in% c("Conflict(All,Mature)*", "Conflict(All,Mature)"),]$point2 <- "b"
+meltedconflict_df[meltedconflict_df$value %in% c("Conflict(All,Mature)*", "Conflict(All,Mature)"),]$color2 <- "All"
+
+
+meltedconflict_df[meltedconflict_df$value %in% c("Conflict(Immature,Mature)*", "Conflict(Immature,Mature)"),]$point1 <- "a"
+meltedconflict_df[meltedconflict_df$value %in% c("Conflict(Immature,Mature)*", "Conflict(Immature,Mature)"),]$color1 <- "Immature"
+
+meltedconflict_df[meltedconflict_df$value %in% c("Conflict(Immature,Mature)*", "Conflict(Immature,Mature)"),]$point2 <- "b"
+meltedconflict_df[meltedconflict_df$value %in% c("Conflict(Immature,Mature)*", "Conflict(Immature,Mature)"),]$color2 <- "Mature"
+
+
+meltedconflict_df[meltedconflict_df$value %in% c("Immature"),]$color1 <- 'Immature' 
+meltedconflict_df[meltedconflict_df$value %in% c("Mature"),]$color1 <- 'Mature' 
+meltedconflict_df[meltedconflict_df$value %in% c("Unknown"),]$color1 <- 'Unknown' 
+
+
+meltednonconflict_df <- melt(non_conflict_df[,-6], id.vars = c("Plasmodium.species", "Type_Host", "order", "facet_var"))
+meltednonconflict_df$point1 <- "Square"
+meltednonconflict_df$point2 <- "Square"
+meltednonconflict_df$color1 <- NA
+meltednonconflict_df$color2 <- NA
+
+meltednonconflict_df[meltednonconflict_df$value %in% c("Immature", "Immature*"),]$color1 <- 'Immature' 
+meltednonconflict_df[meltednonconflict_df$value %in% c("Mature","Mature*"),]$color1 <- 'Mature' 
+meltednonconflict_df[meltednonconflict_df$value %in% c("All,All*"),]$color1 <- 'All'
+meltednonconflict_df[meltednonconflict_df$value %in% c("Unknown",NA),]$color1 <- 'Unknown'
+meltednonconflict_df[meltednonconflict_df$value %in% c("No"),]$color1 <- "No"
+  
+
+squared_melted_conflict <- subset(meltedconflict_df,meltedconflict_df$point1 == "Square")
+full_melted_df<- rbind.data.frame(squared_melted_conflict,meltednonconflict_df)
+full_melted_df[is.na(full_melted_df$color1) == TRUE,]$color1 <- 'Unknown'
+
+ggplot(subset(full_melted_df,full_melted_df$facet_var == 1),
+              aes(x = variable, 
+                  y = Plasmodium.species)) +
+                  geom_tile(aes(fill = color1),color= 'black', size =0.5) + 
+  geom_point(data = subset(meltedconflict_df,meltedconflict_df$facet_var ==1 &meltedconflict_df$point1 != "Square"),
+                           aes(x = variable, y= Plasmodium.species, shape = point1,color = color1), size = 13.5)+
+  geom_point(data = subset(meltedconflict_df,meltedconflict_df$facet_var ==1 &meltedconflict_df$point1 != "Square"  ),aes(x = variable, y = Plasmodium.species, 
+                                                                                  shape = point2, color = color2), size = 13.5)+
+  scale_shape_manual(values=c("\u25E4","\u25E2"))+
+  scale_color_manual(values = c("All" = "#f16362", "Immature" = "#003f5b", "Mature" = '#faa51a')) +
+  scale_fill_manual(values = c(
+                               "Immature" = '#003f5b',
+                               "Mature" = '#faa51a', 
+                               "Unknown" = "lightgrey", "No" = "black"),na.value = 'black')+
+  scale_x_discrete(label = c("Known preference", "Inferred preference", "Greater burst size in..."))+
+  xlab("")+
+  ylab("")+
+  coord_equal()+
+  geom_vline(xintercept =c(1.5,1 + 1.5), size = 0.7)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none',
+        axis.line = element_blank(),
+        axis.text = element_text(color = 'black', size = 14))
+  
+
+ggplot(subset(full_melted_df,full_melted_df$facet_var == 2),
+       aes(x = variable, 
+           y = Plasmodium.species)) +
+  geom_tile(aes(fill = color1),color= 'black', size =0.5) + 
+  geom_point(data = subset(meltedconflict_df,meltedconflict_df$facet_var ==2 &meltedconflict_df$point1 != "Square"),
+             aes(x = variable, y= Plasmodium.species, shape = point1,color = color1), size = 16.5)+
+  geom_point(data = subset(meltedconflict_df,meltedconflict_df$facet_var ==2 &meltedconflict_df$point1 != "Square"  ),aes(x = variable, y = Plasmodium.species, 
+                                                                                                                          shape = point2, color = color2), size = 16.5)+
+  scale_shape_manual(values=c("\u25E4","\u25E2"))+
+  scale_color_manual(values = c("All" = "#f16362", "Immature" = "#003f5b", "Mature" = '#faa51a')) +
+  scale_fill_manual(values = c(
+    "Immature" = '#003f5b',
+    "Mature" = '#faa51a', 
+    "Unknown" = "lightgrey", "No" = "black"),na.value = 'black')+
+  scale_x_discrete(label = c("Known preference", "Inferred preference", "Greater burst size in..."))+
+  xlab("")+
+  ylab("")+
+  geom_vline(xintercept =c(1.5,1 + 1.5), size = 0.7)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none',
+        axis.line = element_blank(),
+        axis.text = element_text(color = 'black', size = 14))
+
+
+a<- ggplot(subset(full_melted_df,full_melted_df$facet_var == 1),
+       aes(y = variable, 
+           x = Plasmodium.species)) +
+  geom_tile(aes(fill = color1),color= 'black', 
+            size =0.5) + 
+  geom_point(data = subset(meltedconflict_df,meltedconflict_df$facet_var ==1 &meltedconflict_df$point1 != "Square"),
+             aes(y = variable, x= Plasmodium.species, shape = point1,color = color1), size = 30.5)+
+  geom_point(data = subset(meltedconflict_df,meltedconflict_df$facet_var ==1 &meltedconflict_df$point1 != "Square"  ),aes(y= variable,x = Plasmodium.species, 
+                                                                                                                          shape = point2, color = color2), size = 30.5)+
+  scale_shape_manual(values=c("\u25E4","\u25E2"))+
+  scale_color_manual(values = c("All" = "#f16362", "Immature" = "#003f5b", "Mature" = '#faa51a')) +
+  scale_fill_manual(values = c(
+    "Immature" = '#003f5b',
+    "Mature" = '#faa51a', 
+    "Unknown" = "lightgrey", "No" = "black"),na.value = 'black')+
+  scale_y_discrete(label = c("Known preference", "Inferred preference", "Greater burst size in..."),)+
+  xlab("")+
+  ylab("")+
+  coord_equal()+
   theme_classic()+
-  theme(axis.text = element_text(size = 12, color = 'black'),
-        axis.title = element_text(size = 13, color = 'black'))
+  geom_hline(yintercept =c(1.5,1 + 1.5), size = 0.7)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none',
+        axis.line = element_blank(),
+        axis.text = element_text(color = 'black', size = 14))
 
 
+b<- ggplot(subset(full_melted_df,full_melted_df$facet_var == 2),
+       aes(y = variable, 
+           x = Plasmodium.species)) +
+  geom_tile(aes(fill = color1),color= 'black', 
+            size =0.5) + 
+  geom_point(data = subset(meltedconflict_df,meltedconflict_df$facet_var ==2 &meltedconflict_df$point1 != "Square"),
+             aes(y = variable, x= Plasmodium.species, shape = point1,color = color1), size = 10)+
+  geom_point(data = subset(meltedconflict_df,meltedconflict_df$facet_var ==2 &meltedconflict_df$point1 != "Square"  ),aes(y= variable,x = Plasmodium.species, 
+                                                                                                                          shape = point2, color = color2), size = 10)+
+  scale_shape_manual(values=c("\u25E4","\u25E2"))+
+  scale_color_manual(values = c("All" = "#f16362", "Immature" = "#003f5b", "Mature" = '#faa51a')) +
+  scale_fill_manual(values = c(
+    "Immature" = '#003f5b',
+    "Mature" = '#faa51a', 
+    "Unknown" = "lightgrey", "No" = "black"),na.value = 'black')+
+  scale_y_discrete(label = c("Known preference", "Inferred preference", "Greater burst size in..."),)+
+  xlab("")+
+  ylab("")+
+  coord_equal()+
+  theme_classic()+
+  geom_hline(yintercept =c(1.5,1 + 1.5), size = 0.7)+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = 'none',
+        axis.line = element_blank(),
+        axis.text = element_text(color = 'black', size = 14))
 
-
-UPPER_GG + Preference_GG
-
-ggsave(here("Figures", "Raw", "Duration_Age_preference.pdf"), units = 'in', 
-       height = 5, width = 12)
-
-
+a/b

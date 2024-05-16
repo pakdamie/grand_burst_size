@@ -1,12 +1,4 @@
-# HEADER --------------------------------------------
-#
-# Author: Damie Pak
-# Copyright (c) Damie Pak, 2023
-# Email:  dp495@cornell.edu
-#
-# Date: 2023-04-21
-#
-# Script Name: 03_Main_Analysis_SurfacePlot.R
+# Script Name: 02_Main_Analysis_SurfacePlot.R
 #
 # Script Description: This is the script that takes the output
 #from the previous analysis and produce the first surface plot 
@@ -22,8 +14,8 @@
 library(here)
 source(here("Code", "Functions", "FUNC_00_Grapher_vert_hor.R"))
 source(here("Code", "Functions", "FUNC_00_Fitness_Functions.R"))
-source(here("Code", "Functions","FUNC_00_best_long_strategyfinder.R"))
-source(here("Code", "Functions","PLOTTER_03_SurfacePlot_Maker.R"))
+source(here("Code", "Functions", "FUNC_00_best_long_strategyfinder.R"))
+source(here("Code", "Functions", "PLOTTER_03_SurfacePlot_Maker.R"))
 
 ######################################################
 ### Makes Figure 2, which is the surface plot of the##

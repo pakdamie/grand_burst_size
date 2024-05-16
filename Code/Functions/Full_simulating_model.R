@@ -1,9 +1,5 @@
 
 
-
-
-
-
 FULL_MODEL_SIMULATING_Duration <- function(initial_value, species, include_death) {
   
   ### THE FIRST PART OF THE MODEL, trying to figure out what
