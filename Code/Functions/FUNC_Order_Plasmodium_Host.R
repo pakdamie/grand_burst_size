@@ -7,7 +7,6 @@ Ordering_PlasmodiumSP_Burst <- function(malaria_dat, tip_names){
 
     for (host_species in seq(1,nrow(tip_names))){
         host_interest <- tip_names$label[[host_species]]
-        
         plas_interests <- subset(malaria_dat,
                                  malaria_dat$Type.Host == 
                                    host_interest)[,c("Plasmodium.species",
