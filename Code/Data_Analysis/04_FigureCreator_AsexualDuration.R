@@ -31,5 +31,5 @@ duration_burst_size_GG <- ggplot(
     axis.title = element_text(size = 16, color = "black")
   )
 
-ggsave(here("Figures", "Raw", "duration_ggplot.pdf"), width = 9, height = 4, 
+ggsave(here("Figures", "Raw", "duration_ggplot.pdf"), width =10, height = 9, 
        units = 'in')

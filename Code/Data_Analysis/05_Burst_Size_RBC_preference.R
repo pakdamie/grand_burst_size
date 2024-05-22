@@ -40,11 +40,8 @@ ordered_pruned_dat$Plasmodium.species <- factor(ordered_pruned_dat$Plasmodium.sp
 ordered_pruned_dat <- ordered_pruned_dat[order(ordered_pruned_dat$order), ]
 ordered_pruned_dat$facet_var <- NA
 ### Basically have it so that we split by facet.
-ordered_pruned_dat$facet_var[ordered_pruned_dat$order %in% seq(1, 16)] <- 1
-ordered_pruned_dat$facet_var[ordered_pruned_dat$order %in% seq(17, 33)] <- 2
-ordered_pruned_dat$facet_var[ordered_pruned_dat$order %in% seq(34, 54)] <- 3
-ordered_pruned_dat$facet_var[ordered_pruned_dat$order %in% seq(55, 89)] <- 4
-
+ordered_pruned_dat$facet_var[ordered_pruned_dat$order %in% seq(1, 33)] <- 1
+ordered_pruned_dat$facet_var[ordered_pruned_dat$order %in% seq(34, 89)] <- 2
 
 ### These are the species where there is a conflict
 only_conflict_df <- subset(ordered_pruned_dat, ordered_pruned_dat$Known_Preference %in% c(
@@ -115,24 +112,19 @@ full_melted_df <- rbind.data.frame(squared_melted_conflict, meltednonconflict_df
 full_melted_df[is.na(full_melted_df$color1) == TRUE, ]$color1 <- "Unknown"
 
 
-ggplot(full_melted_df, aes(x = Plasmodium.species))+
-  
-  theme(axis.text.x = element_text(angle = 45, hjust = 0.01,family = "sans"))
-
-facet_tile_1_GG <-
-  ggplot(
-    subset(full_melted_df, full_melted_df$facet_var == 1),
-    aes(x = Plasmodium.species, y = variable)
+  ggplot(full_melted_df,
+    aes(y = Plasmodium.species, x = variable)
   ) +
-  geom_tile(aes(fill = color1), color = "black", size = 0.2) +
+  geom_point(aes(fill = color1), color = "darkgrey", size = 3.5, shape = 22) +
   geom_point(
-    data = subset(meltedconflict_df, meltedconflict_df$facet_var == 1 & meltedconflict_df$point1 != "Square"),
-    aes(x = Plasmodium.species, y = variable, shape = point1, color = color1), size = 32.5
+    data = subset(meltedconflict_df, meltedconflict_df$point1 != "Square"),
+    aes(y = Plasmodium.species, x = variable, shape = point1, color = color1), size = 7
   ) +
   geom_point(
-    data = subset(meltedconflict_df, meltedconflict_df$facet_var == 1 & meltedconflict_df$point1 != "Square"),
-    aes(y = variable, x = Plasmodium.species, shape = point2, color = color2), size = 32.5
+    data = subset(meltedconflict_df, meltedconflict_df$point1 != "Square"),
+    aes(x = variable, y = Plasmodium.species, shape = point2, color = color2), size = 7
   )  +
+  facet_wrap(~facet_var, scales= 'free_y')+
   scale_shape_manual(values = c("\u25E4", "\u25E2")) +
   scale_color_manual(values = c("All" = "#edce86", "Immature" = "#cf5982", "Mature" = "#009392")) +
   scale_fill_manual(values = c(
@@ -140,127 +132,21 @@ facet_tile_1_GG <-
     "Mature" = "#009392",
     "Unknown" = "white", "No" = "black", "All" = "#edce86"
   )) +
-  scale_y_discrete(label = c("Greater burst size in...", "Inferred preference", "Known preference"), limits = rev) +
-  scale_x_discrete(position = "top") +
-  xlab("") +
+  scale_x_discrete(label = c("Known preference", "Inferred preference","Greater burst size in...")) +
+    scale_y_discrete(limits = rev) +
+    
+    xlab("") +
   ylab("") +
-  coord_equal() +
   theme_classic() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 0.01),
+    theme(aspect.ratio =12)+  theme(
+    axis.text.x = element_text(angle = 45,hjust = 1),
+    axis.text.y = element_text(color = 'black', size = 13),
     axis.ticks = element_blank(),
     legend.position = "none",
     axis.line = element_blank(),
-    axis.text = element_text(color = "black", size = 12)
+    strip.background = element_blank(),
+    strip.text = element_blank()
   )
 
-facet_tile_2_GG <- ggplot(
-  subset(full_melted_df, full_melted_df$facet_var == 2),
-  aes(x = Plasmodium.species, y = variable)
-) +
-  geom_tile(aes(fill = color1), color = "black", size = 0.2) +
-  geom_point(
-    data = subset(meltedconflict_df, meltedconflict_df$facet_var == 2 & meltedconflict_df$point1 != "Square"),
-    aes(x = Plasmodium.species, y = variable, shape = point1, color = color1), size = 32.5
-  ) +
-  geom_point(
-    data = subset(meltedconflict_df, meltedconflict_df$facet_var == 2 & meltedconflict_df$point1 != "Square"),
-    aes(y = variable, x = Plasmodium.species, shape = point2, color = color2), size = 32.5
-  ) +
-  
-  scale_shape_manual(values = c("\u25E4", "\u25E2")) +
-  scale_color_manual(values = c("All" = "#edce86", "Immature" = "#cf5982", "Mature" = "#009392")) +
-  scale_fill_manual(values = c(
-    "Immature" = "#cf5982",
-    "Mature" = "#009392",
-    "Unknown" = "white", "No" = "black", "All" = "#edce86"
-  )) +
-  scale_y_discrete(label = c("Greater burst size in...", "Inferred preference", "Known preference"), limits = rev) +
-  scale_x_discrete(position = "top") +
-  xlab("") +
-  ylab("") +
-  coord_equal() +
-  theme_classic() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 0.3),
-    axis.ticks = element_blank(),
-    legend.position = "none",
-    axis.line = element_blank(),
-    axis.text = element_text(color = "black", size = 12)
-  )
+ggsave(here("Figures", "Raw", "ggtitle_Figure4_facetb_2.pdf"), width = 5, height = 10, units = "in")
 
-facet_tile_3_GG <- ggplot(
-  subset(full_melted_df, full_melted_df$facet_var == 3),
-  aes(x = Plasmodium.species, y = variable)
-) +
-  geom_tile(aes(fill = color1), color = "black", size = 0.2) +
-  geom_point(
-    data = subset(meltedconflict_df, meltedconflict_df$facet_var == 3 & meltedconflict_df$point1 != "Square"),
-    aes(x = Plasmodium.species, y = variable, shape = point1, color = color1), size = 32.5
-  ) +
-  geom_point(
-    data = subset(meltedconflict_df, meltedconflict_df$facet_var == 3 & meltedconflict_df$point1 != "Square"),
-    aes(y = variable, x = Plasmodium.species, shape = point2, color = color2), size = 32.5
-  ) +
-  scale_shape_manual(values = c("\u25E4", "\u25E2")) +
-  scale_color_manual(values = c("All" = "#edce86", "Immature" = "#cf5982", "Mature" = "#009392")) +
-  scale_fill_manual(values = c(
-    "Immature" = "#cf5982",
-    "Mature" = "#009392",
-    "Unknown" = "white", "No" = "black", "All" = "#edce86"
-  )) +
-  scale_y_discrete(label = c("Greater burst size in...", "Inferred preference", "Known preference"), limits = rev) +
-  scale_x_discrete(position = "top") +
-  xlab("") +
-  ylab("") +
-  coord_equal() +
-  theme_classic() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 0),
-    axis.ticks = element_blank(),
-    legend.position = "none",
-    axis.line = element_blank(),
-    axis.text = element_text(color = "black", size = 12)
-  )
-
-
-facet_tile_4_GG <- ggplot(
-  subset(full_melted_df, full_melted_df$facet_var == 4),
-  aes(x = Plasmodium.species, y = variable)
-) +
-  geom_tile(aes(fill = color1), color = "black", size = 0.2) +
-  geom_point(
-    data = subset(meltedconflict_df, meltedconflict_df$facet_var == 4 & meltedconflict_df$point1 != "Square"),
-    aes(x = Plasmodium.species, y = variable, shape = point1, color = color1), size = 45.5
-  ) +
-  geom_point(
-    data = subset(meltedconflict_df, meltedconflict_df$facet_var == 4 & meltedconflict_df$point1 != "Square"),
-    aes(y = variable, x = Plasmodium.species, shape = point2, color = color2), size = 45.5
-  ) +
-  scale_shape_manual(values = c("\u25E4", "\u25E2")) +
-  scale_color_manual(values = c("All" = "#edce86", "Immature" = "#cf5982", "Mature" = "#009392")) +
-  scale_fill_manual(values = c(
-    "Immature" = "#cf5982",
-    "Mature" = "#009392",
-    "Unknown" = "white", "No" = "black", "All" = "#edce86"
-  )) +
-  scale_y_discrete(label = c("Greater burst size in...", "Inferred preference", "Known preference"), limits = rev) +
-  scale_x_discrete(position = "top") +
-  xlab("") +
-  ylab("") +
-  coord_equal() +
-  theme_classic() +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 0.3),
-    axis.ticks = element_blank(),
-    legend.position = "none",
-    axis.line = element_blank(),
-    axis.text = element_text(color = "black", size = 12)
-  )
-
-facet_tile_1_GG/
-facet_tile_2_GG/
-facet_tile_3_GG/
-facet_tile_4_GG
-
-ggsave(here("Figures", "Raw", "ggtitle_Figure4_facetb_2.pdf"), width = 30, height = 20, units = "in")
