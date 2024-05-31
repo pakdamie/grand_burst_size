@@ -11,18 +11,24 @@
 sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_CUT.cpp"))
 sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 
-Simulator_Malaria_BC_PF <- function(B_V, C_V, initialvalue, include_death) {
+Simulator_Malaria_BC_PF <- function(B_V, 
+                                    C_V,  
+                                    p_val,
+                                    mu_M, 
+                                    initialvalue, 
+                                    include_death) {
+  
   parameters_n <- c(
     lambda = 2e5, # replenishment rate of RBC (#SimulatedTimeSeries.R)
     K = 6315789, # carrying capacity of RBC population in the absence of mortality (#Simulated Time series)
-    pmax = 8.35e-6, # rate of infection (From American Naturalist- Greischar et al. 2014)
+    pmax = p_val, # rate of infection (From American Naturalist- Greischar et al. 2014)
     muR = 1 / 120, # Daily mortality rate of red blood cells (SimulatedTimeSeries.R)
     muI = 1 / 120, # Daily mortality rate of infected red blood cells (SimulatedTimeSeries.R)
     c = C_V, # transmission investment (Vary)
     B = B_V, # the burst size (Vary)
     alpha1 = 1 / 2, # the rate of development of parasite in iRBC (SimulatedTimeSeries.R)
     alpha2 = 1 / 7, # the rate of development (SimulatedTimeSeries.R)
-    muM = 200, # background mortality of the merozoite (SimulatedTimeSeries.R)
+    muM = mu_M, # background mortality of the merozoite (SimulatedTimeSeries.R)
     muG = log(2) / 2.4, # background mortality of the immature/mature gametocytes (SimulatedTimeSeries.R)
     n1 = 10, # shape parameter controlling the variability in (SimulatedTimeSeries.R)
     n2 = 10, # background mortality of the merozoite (SimulatedTimeSeries.R)
@@ -80,6 +86,8 @@ Simulator_Malaria_BC_PF <- function(B_V, C_V, initialvalue, include_death) {
     B_V = B_V,
     C_V = C_V,
     initialvalue = initialvalue,
+    p_val = p_val,
+    mu_M = mu_M,
     infection_length =
       ifelse(!is.null(attributes(out_DDE)$troot),
         attributes(out_DDE)$troot,
@@ -92,19 +100,20 @@ Simulator_Malaria_BC_PF <- function(B_V, C_V, initialvalue, include_death) {
 ### run this when you know when the acute phase ends from the prior analyses
 
 
-Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V, initialvalue, endtime) {
+Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V,  p_val,
+                                           mu_M, initialvalue, endtime) {
   parameters_n <-
     c(
       lambda = 2e5, # replenishment rate of RBC (#SimulatedTimeSeries.R)
       K = 6315789, # carrying capacity of RBC population in the absence of mortality (#Simulated Time series)
-      pmax = 8.35e-6, # rate of infection (From American Naturalist- Greischar et al. 2014)
+      pmax = p_val, # rate of infection (From American Naturalist- Greischar et al. 2014)
       muR = 1 / 120, # Daily mortality rate of red blood cells (SimulatedTimeSeries.R)
       muI = 1 / 120, # Daily mortality rate of infected red blood cells (SimulatedTimeSeries.R)
       c = C_V, # transmission investment (Vary)
       B = B_V, # the burst size (Vary)
       alpha1 = 1 / 2, # the rate of development of parasite in iRBC (SimulatedTimeSeries.R)
       alpha2 = 1 / 7, # the rate of development (SimulatedTimeSeries.R)
-      muM = 200, # background mortality of the merozoite (SimulatedTimeSeries.R)
+      muM = mu_M, # background mortality of the merozoite (SimulatedTimeSeries.R)
       muG = log(2) / 2.4, # background mortality of the immature/mature gametocytes (SimulatedTimeSeries.R)
       n1 = 10, # shape parameter controlling the variability in (SimulatedTimeSeries.R)
       n2 = 10, # background mortality of the merozoite (SimulatedTimeSeries.R)
@@ -139,5 +148,5 @@ Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V, initialvalue, endtime) {
   )
 
 
-  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V))
+  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V,p_val = p_val,mu_M = mu_M))
 }

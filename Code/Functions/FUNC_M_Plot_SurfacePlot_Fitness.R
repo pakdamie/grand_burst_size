@@ -1,3 +1,6 @@
+###This is the function that plots out the 
+### surface plot of the species of interest.
+
 
 MAIN_SURFACEPLOT_GG_GRAPHER_FIT <- function(x, species){
 
