@@ -3,7 +3,9 @@
 ### initial (default) is 4358.965            #
 ###
 ### Input: Burst size (B_V), transmission investment (C_V),#
-### and the initial, inoculum of parasite (initialvalue)
+### and the initial inoculum of parasite (initialvalue),
+### variable_interest = pmax or muM, 
+###variable interest_number, insert value 
 ### Output: Dataframe with only IRBC and gametocytes
 
 ### Main modeling codes are written in C++, so if you would like to 
@@ -12,19 +14,25 @@ sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_CUT.cpp"))
 sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 
 ### This function simulates to Day 100 unless there is death.
-Simulator_Malaria_BC_PC <- function(B_V, C_V, initialvalue, include_death) {
+Simulator_Malaria_BC_PC <- function(B_V, 
+                                    C_V, 
+                                    p_val ,
+                                    mu_M ,
+                                    initialvalue, 
+                                    include_death) {
+
   parameters_n <-
     c(
       lambda = 370000, # Replenishment rate of RBC (#SimulatedTimeSeries.R)
       K = 19968254, # Carrying capacity of RBC population in the absence of mortality
-      pmax = 4.0e-6, # Rate of infection (From American Naturalist- Greischar et al. 2014)
+      pmax =  p_val, # Rate of infection (From American Naturalist- Greischar et al. 2014)
       muR = 0.025, # Daily mortality rate of red blood cells
       muI = 0.025, # Daily mortality rate of infected red blood cells
       c = C_V, # Transmission investment (THE VARYING FACTOR)
       B = B_V, # The burst size (THE VARYING FACTOR)
       alpha1 = 1, # The rate of development of parasite in iRBC
       alpha2 = 1 / 2, # The rate of development for the gametocytes
-      muM = 48, # Background mortality of the merozoite
+      muM =  mu_M, # Background mortality of the merozoite
       muG = 4, # Background mortality of the immature/mature gametocytes
       n1 = 100, # Shape parameter controlling the variability in asexual devleopment
       n2 = 100 # Shape parameter controlling the variability in sexual development
@@ -73,12 +81,13 @@ Simulator_Malaria_BC_PC <- function(B_V, C_V, initialvalue, include_death) {
       rootfun = rootfun
     )
   }
-
-
+  
   return(data.frame(out_DDE[, c("time", "R", "G")],
     B_V = B_V,
     C_V = C_V,
     initialvalue = initialvalue,
+    p_val = p_val,
+    mu_M = mu_M,
     infection_length =
       ifelse(!is.null(attributes(out_DDE)$troot),
         attributes(out_DDE)$troot,
@@ -91,19 +100,26 @@ Simulator_Malaria_BC_PC <- function(B_V, C_V, initialvalue, include_death) {
 ### This function simulates to the end of the acute phase, you only
 ### run this when you know when the acute phase ends from the prior analyses
 
-Simulator_MalariaPC_DDE_BC_Cut <- function(B_V, C_V, initialvalue, endtime) {
-  parameters_n <-
+
+Simulator_MalariaPC_DDE_BC_Cut <- function(B_V, 
+                                           C_V, 
+                                           p_val,
+                                           mu_M,
+                                           initialvalue, 
+                                           endtime) {
+ 
+   parameters_n <-
     c(
       lambda = 370000, # Replenishment rate of RBC (#SimulatedTimeSeries.R)
       K = 19968254, # Carrying capacity of RBC population in the absence of mortality
-      pmax = 4.0e-6, # Rate of infection (From American Naturalist- Greischar et al. 2014)
+      pmax = p_val, # Rate of infection (From American Naturalist- Greischar et al. 2014)
       muR = 0.025, # Daily mortality rate of red blood cells
       muI = 0.025, # Daily mortality rate of infected red blood cells
       c = C_V, # Transmission investment (THE VARYING FACTOR)
       B = B_V, # The burst size (THE VARYING FACTOR)
       alpha1 = 1, # The rate of development of parasite in iRBC
       alpha2 = 1 / 2, # The rate of development
-      muM = 48, # Background mortality of the merozoite
+      muM = mu_M, # Background mortality of the merozoite
       muG = 4, # Background mortality of the immature/mature gametocytes
       n1 = 100, # Shape parameter controlling the variability in asexual devleopment
       n2 = 100, # Shape parameter controlling the variability in sexual development
@@ -132,5 +148,6 @@ Simulator_MalariaPC_DDE_BC_Cut <- function(B_V, C_V, initialvalue, endtime) {
     parms = parameters_n
   )
 
-  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V))
+  
+  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V, p_val = p_val,mu_M = mu_M))
 }
