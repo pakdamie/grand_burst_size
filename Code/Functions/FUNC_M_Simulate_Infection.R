@@ -5,9 +5,9 @@
 ### given, run it just for that.
 
 Simulate_Infection <- function(species, initial_value = "default",
-                                           C_V_specific = NA,
-                                           variable_interest = NA, 
-                                           include_death = "Yes") {
+                                         C_V_specific = NA,
+                                         variable_interest = NA, 
+                                         include_death = "Yes") {
   
   if (!(species %in% c("PC", "PF"))) {
     stop("Invalid input, either input `PC` for P. chabaudi or `PF`
@@ -27,35 +27,35 @@ Simulate_Infection <- function(species, initial_value = "default",
     C_V <- C_V_specific
   }
 
+  ###If the variable of interest is "pmax' 
   if (is.na(variable_interest) == FALSE & variable_interest == "pmax") {
+   
     ### Invasion rate
-    p_val <- switch(species,
-      "PC" = seq(1.0e-7, 1.74e-05, length = 50),
-      "PF" = seq(1.0e-7,  1.74e-05, length = 50)
-    )
-    mu_M <- switch(species,
-      "PC" = 48,
-      "PF" = 200
-    )
+    p_val <- seq(0.50, 1.50, length = 5)
+    
+    ###UNCHANGED
+    mu_M <- 1
+    R_Modifier<- 1
   } else if (is.na(variable_interest) == FALSE & variable_interest == "mu_M") {
-    mu_M <- seq(1/24, 600, length = 100)
 
-        p_val <- switch(species,
-      "PC" = 4.0e-6,
-      "PF" = 8.35e-6
-    )
-  } else if (is.na(variable_interest) == TRUE) {
-    p_val <- switch(species,
-      "PC" = 4.0e-6,
-      "PF" = 8.35e-6
-    )
+      mu_M <- seq(0.50, 1.50,length =5)
+      p_val <- 1
+      R_Modifier <- 1
+      
+  } else if (is.na(variable_interest) == FALSE & variable_interest == "R_Modifier"){
+    
+    R_Modifier <- seq(0.50, 1.50,length = 5)
+    p_val <- 1
+    R_Modifier <- 1
+    
+    } else if (is.na(variable_interest) == TRUE) {
+    p_val <- 1
     ### Merozoite mortality rate
-    mu_M <- switch(species,
-      "PC" = 48,
-      "PF" = 200
-    )
+    mu_M <- 1
+    R_Modifier <- 1
+    
   }
-  
+
   if (initial_value == "default"){
     initial_value <- switch(species,
                    "PC" = 4385.965,
@@ -65,13 +65,12 @@ Simulate_Infection <- function(species, initial_value = "default",
     initial_value <- initial_value
   }
   
-  
-  
   B_V_C_V <- expand.grid(
     B_V = B_V,
     C_V = C_V,
     p_val = p_val,
     mu_M = mu_M ,
+    R_Modifier =  R_Modifier,
     initialvalue = initial_value)
   
   ### We can already take out parameter combinations that would not
@@ -82,6 +81,7 @@ Simulate_Infection <- function(species, initial_value = "default",
                          species,
                          c(B_V_C_V$p_val),
                          c(B_V_C_V$mu_M),
+                         c(B_V_C_V$R_Modifier),
                          mc.cores = 3,
                          SIMPLIFY = FALSE)
   
@@ -95,6 +95,7 @@ Simulate_Infection <- function(species, initial_value = "default",
                               "Establish",
                               "Fail"
   )
+  
   ### Subset parameter estimations that are successful (may kill host!)
   B_V_C_V_F <- subset(B_V_C_V, B_V_C_V$Establish == "Establish")
   
@@ -112,6 +113,7 @@ Simulate_Infection <- function(species, initial_value = "default",
                          c(B_V_C_V_F$C_V),
                          c(B_V_C_V_F$p_val),
                          c(B_V_C_V_F$mu_M),
+                         c(B_V_C_V_F$R_Modifier),
                          c(B_V_C_V_F$initialvalue),
                          c(include_death),
                          mc.cores = 3,
@@ -147,6 +149,7 @@ Simulate_Infection <- function(species, initial_value = "default",
   Duration_Initial$C_V <- B_V_C_V_F$C_V
   Duration_Initial$p_val <- B_V_C_V_F$p_val
   Duration_Initial$mu_M <- B_V_C_V_F$mu_M
+  Duration_Initial$R_Modifier <- B_V_C_V_F$R_Modifier
   
   
   ### Now we can find the parameter combinations that lead to
@@ -164,7 +167,8 @@ Simulate_Infection <- function(species, initial_value = "default",
       B_V = Failed_B_V_C_V$B_V,
       C_V = Failed_B_V_C_V$C_V,
       p_val = Failed_B_V_C_V$p_val,
-      mu_M = Failed_B_V_C_V$mu_M
+      mu_M = Failed_B_V_C_V$mu_M,
+      R_Modifier = Failed_B_V_C_V$R_Modifier
     )
   
   ### These are the B_V/C_V that would lead to mortality,
@@ -188,21 +192,26 @@ Simulate_Infection <- function(species, initial_value = "default",
                       "PF" = Simulator_MalariaPF_DDE_BC_Cut
   )
   
+if (nrow(Duration_Initial_SUCCESS )  != 0){
   
   Fitness_MODEL <- mcmapply(model_sim_cut ,
                             c(Duration_Initial_SUCCESS$B_V),
                             c(Duration_Initial_SUCCESS$C_V),
                             c(Duration_Initial_SUCCESS$p_val),
                             c(Duration_Initial_SUCCESS$mu_M),
+                            c(Duration_Initial_SUCCESS$R_Modifier),
                             c(initial_value),
                             c(Duration_Initial_SUCCESS$endtime),
-                            mc.cores =3,
+                            mc.cores = 3,
                             SIMPLIFY = FALSE
   )
   
   Duration_Initial_SUCCESS$end_fitness <-
     unlist(lapply(Fitness_MODEL, Gametocyte_Fitness, species = species))
-  
+}
+  else{
+    Duration_Initial_SUCCESS <- NA
+  }
   ### These are the fitness model data.frame that should work
   Fitness_MODEL_FULL <- rbind.data.frame(
     Duration_Initial_SUCCESS,

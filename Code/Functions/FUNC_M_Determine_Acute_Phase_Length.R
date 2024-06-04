@@ -12,6 +12,7 @@
 ###      cycle duration), alpha2 (sexual cycle), muM (merozoite mortality),
 ###      muG (gametocyte mortality)
 
+
 ### Output: A data.frame containing the end of the acute phase
 Finder_RM <- function(x_list, species) {
  
@@ -92,7 +93,6 @@ Finder_RM <- function(x_list, species) {
       )
 
     ### Find when there lowest RM is (Should be lower than 1)
-      
       
     min_RM <- RM_time_df[which.min(RM_time_df$rate), ]
 

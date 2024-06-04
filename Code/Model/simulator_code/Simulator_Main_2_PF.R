@@ -15,20 +15,21 @@ Simulator_Malaria_BC_PF <- function(B_V,
                                     C_V,  
                                     p_val,
                                     mu_M, 
+                                    R_Modifier,
                                     initialvalue, 
                                     include_death) {
   
   parameters_n <- c(
     lambda = 2e5, # replenishment rate of RBC (#SimulatedTimeSeries.R)
     K = 6315789, # carrying capacity of RBC population in the absence of mortality (#Simulated Time series)
-    pmax = p_val, # rate of infection (From American Naturalist- Greischar et al. 2014)
+    pmax = p_val * 8.35e-6, # rate of infection (From American Naturalist- Greischar et al. 2014)
     muR = 1 / 120, # Daily mortality rate of red blood cells (SimulatedTimeSeries.R)
     muI = 1 / 120, # Daily mortality rate of infected red blood cells (SimulatedTimeSeries.R)
     c = C_V, # transmission investment (Vary)
     B = B_V, # the burst size (Vary)
     alpha1 = 1 / 2, # the rate of development of parasite in iRBC (SimulatedTimeSeries.R)
     alpha2 = 1 / 7, # the rate of development (SimulatedTimeSeries.R)
-    muM = mu_M, # background mortality of the merozoite (SimulatedTimeSeries.R)
+    muM = mu_M * 200, # background mortality of the merozoite (SimulatedTimeSeries.R)
     muG = log(2) / 2.4, # background mortality of the immature/mature gametocytes (SimulatedTimeSeries.R)
     n1 = 10, # shape parameter controlling the variability in (SimulatedTimeSeries.R)
     n2 = 10, # background mortality of the merozoite (SimulatedTimeSeries.R)
@@ -44,7 +45,7 @@ Simulator_Malaria_BC_PF <- function(B_V,
 
   ### The initial numbers
   inits_n <- c(
-    R = 5e6, # RBC
+    R = R_Modifier * 5e6, # RBC
     I = rep(initialvalue / n1, n1), # Infected RBC: note the uniform distribution
     M = 0, # Merozoites
     IG = rep(0, n2), # Immature gametocytes
@@ -88,6 +89,7 @@ Simulator_Malaria_BC_PF <- function(B_V,
     initialvalue = initialvalue,
     p_val = p_val,
     mu_M = mu_M,
+    R_Modifier = R_Modifier,
     infection_length =
       ifelse(!is.null(attributes(out_DDE)$troot),
         attributes(out_DDE)$troot,
@@ -101,19 +103,19 @@ Simulator_Malaria_BC_PF <- function(B_V,
 
 
 Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V,  p_val,
-                                           mu_M, initialvalue, endtime) {
+                                           mu_M, R_Modifier, initialvalue, endtime) {
   parameters_n <-
     c(
       lambda = 2e5, # replenishment rate of RBC (#SimulatedTimeSeries.R)
       K = 6315789, # carrying capacity of RBC population in the absence of mortality (#Simulated Time series)
-      pmax = p_val, # rate of infection (From American Naturalist- Greischar et al. 2014)
+      pmax = p_val * 8.35e-6, # rate of infection (From American Naturalist- Greischar et al. 2014)
       muR = 1 / 120, # Daily mortality rate of red blood cells (SimulatedTimeSeries.R)
       muI = 1 / 120, # Daily mortality rate of infected red blood cells (SimulatedTimeSeries.R)
       c = C_V, # transmission investment (Vary)
       B = B_V, # the burst size (Vary)
       alpha1 = 1 / 2, # the rate of development of parasite in iRBC (SimulatedTimeSeries.R)
       alpha2 = 1 / 7, # the rate of development (SimulatedTimeSeries.R)
-      muM = mu_M, # background mortality of the merozoite (SimulatedTimeSeries.R)
+      muM = mu_M * 200, # background mortality of the merozoite (SimulatedTimeSeries.R)
       muG = log(2) / 2.4, # background mortality of the immature/mature gametocytes (SimulatedTimeSeries.R)
       n1 = 10, # shape parameter controlling the variability in (SimulatedTimeSeries.R)
       n2 = 10, # background mortality of the merozoite (SimulatedTimeSeries.R)
@@ -130,7 +132,7 @@ Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V,  p_val,
 
   ### The initial number
   inits_n <- c(
-    R = 5e6, # RBC
+    R = R_Modifier * 5e6, # RBC
     I = rep(initialvalue / n1, n1), # Infected RBC: note the uniform distribution
     M = 0, # Merozoites
     IG = rep(0, n2), # Immature gametocytes
@@ -148,5 +150,5 @@ Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V,  p_val,
   )
 
 
-  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V,p_val = p_val,mu_M = mu_M))
+  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V,p_val = p_val,mu_M = mu_M, R_Modifier = R_Modifier))
 }

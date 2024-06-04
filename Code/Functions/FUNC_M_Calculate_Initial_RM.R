@@ -11,7 +11,7 @@
 ### Output: A single value of RM. Initial RM must be greater than this
 ### value for the infection to establish
 
-Calculate_Initial_RM <- function(species, p_val, mu_M) {
+Calculate_Initial_RM <- function(species, p_val, mu_M, R_modifier) {
   
   if (!(species %in% c("PC", "PF"))) {
     stop("Invalid input, either input `PC` for P. chabaudi or `PF`
@@ -26,13 +26,22 @@ Calculate_Initial_RM <- function(species, p_val, mu_M) {
     "PF" = ((10 * (1 / 2) + (1 / 120))^10) / (10 * (1 / 2))^10
   )
 
-  ### Initial RBCs - this remain unchanged!
-  R_val <- switch(species,
-    "PC" = 8500000,
-    "PF" = 5e6
-  )
+  
+  p_mod <- switch(species,
+                  "PC" = p_val * 4.0e-6,
+                  "PF" = p_val * 8.35e-6)
 
-  RM_limit_1 <- initial_RM_modifier * time_delayer * ((p_val * R_val) + mu_M) / (p_val * R_val)
+  mu_mod <- switch(species,
+                  "PC" = mu_M * 48,
+                  "PF" = mu_M* 200)
+  R_mod <- switch(species,
+                   "PC" = R_modifier *  8500000,
+                   "PF" = R_modifier * 5e6)
+  
+  
+  
+
+  RM_limit_1 <- initial_RM_modifier * time_delayer * ((p_mod * R_mod) + mu_mod) / (p_mod * R_mod)
 
   return(RM_limit_1)
 }

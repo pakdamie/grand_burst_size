@@ -4,8 +4,8 @@
 ###
 ### Input: Burst size (B_V), transmission investment (C_V),#
 ### and the initial inoculum of parasite (initialvalue),
-### variable_interest = pmax or muM, 
-###variable interest_number, insert value 
+### variable_interest = pmax or muM or R_modifier, 
+
 ### Output: Dataframe with only IRBC and gametocytes
 
 ### Main modeling codes are written in C++, so if you would like to 
@@ -17,22 +17,23 @@ sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 Simulator_Malaria_BC_PC <- function(B_V, 
                                     C_V, 
                                     p_val ,
-                                    mu_M ,
+                                    mu_M,
                                     initialvalue, 
+                                    R_Modifier,
                                     include_death) {
-
+  
   parameters_n <-
     c(
       lambda = 370000, # Replenishment rate of RBC (#SimulatedTimeSeries.R)
       K = 19968254, # Carrying capacity of RBC population in the absence of mortality
-      pmax =  p_val, # Rate of infection (From American Naturalist- Greischar et al. 2014)
+      pmax =  p_val * 4.0e-6 , # Rate of infection (From American Naturalist- Greischar et al. 2014)
       muR = 0.025, # Daily mortality rate of red blood cells
       muI = 0.025, # Daily mortality rate of infected red blood cells
       c = C_V, # Transmission investment (THE VARYING FACTOR)
       B = B_V, # The burst size (THE VARYING FACTOR)
       alpha1 = 1, # The rate of development of parasite in iRBC
       alpha2 = 1 / 2, # The rate of development for the gametocytes
-      muM =  mu_M, # Background mortality of the merozoite
+      muM =  mu_M * 48, # Background mortality of the merozoite
       muG = 4, # Background mortality of the immature/mature gametocytes
       n1 = 100, # Shape parameter controlling the variability in asexual devleopment
       n2 = 100 # Shape parameter controlling the variability in sexual development
@@ -46,7 +47,7 @@ Simulator_Malaria_BC_PC <- function(B_V,
   ### The initial numbers
   inits_n <-
     c(
-      R = 8500000, # RBC
+      R = 8500000 * R_Modifier, # RBC
       I = rep(initialvalue / n1, n1), # Infected RBC: note the uniform distribution
       M = 0, # Merozoites
       IG = rep(0, n2), # Immature gametocytes
@@ -88,6 +89,7 @@ Simulator_Malaria_BC_PC <- function(B_V,
     initialvalue = initialvalue,
     p_val = p_val,
     mu_M = mu_M,
+    R_modifier  = R_Modifier,
     infection_length =
       ifelse(!is.null(attributes(out_DDE)$troot),
         attributes(out_DDE)$troot,
@@ -106,20 +108,21 @@ Simulator_MalariaPC_DDE_BC_Cut <- function(B_V,
                                            p_val,
                                            mu_M,
                                            initialvalue, 
+                                           R_Modifier,
                                            endtime) {
  
    parameters_n <-
     c(
       lambda = 370000, # Replenishment rate of RBC (#SimulatedTimeSeries.R)
       K = 19968254, # Carrying capacity of RBC population in the absence of mortality
-      pmax = p_val, # Rate of infection (From American Naturalist- Greischar et al. 2014)
+      pmax = p_val * 4.0e-6, # Rate of infection (From American Naturalist- Greischar et al. 2014)
       muR = 0.025, # Daily mortality rate of red blood cells
       muI = 0.025, # Daily mortality rate of infected red blood cells
       c = C_V, # Transmission investment (THE VARYING FACTOR)
       B = B_V, # The burst size (THE VARYING FACTOR)
       alpha1 = 1, # The rate of development of parasite in iRBC
       alpha2 = 1 / 2, # The rate of development
-      muM = mu_M, # Background mortality of the merozoite
+      muM = mu_M * 48, # Background mortality of the merozoite
       muG = 4, # Background mortality of the immature/mature gametocytes
       n1 = 100, # Shape parameter controlling the variability in asexual devleopment
       n2 = 100, # Shape parameter controlling the variability in sexual development
@@ -133,7 +136,7 @@ Simulator_MalariaPC_DDE_BC_Cut <- function(B_V,
 
   ### The initial numbers
   inits_n <- c(
-    R = 8500000,
+    R = 8500000 * R_Modifier,
     I = rep(initialvalue / n1, n1),
     M = 0,
     IG = rep(0, n2),
@@ -149,5 +152,6 @@ Simulator_MalariaPC_DDE_BC_Cut <- function(B_V,
   )
 
   
-  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V, p_val = p_val,mu_M = mu_M))
+  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V, p_val = p_val,
+                    mu_M = mu_M,  R_Modifier  = R_Modifier))
 }

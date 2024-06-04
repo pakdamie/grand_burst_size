@@ -39,6 +39,11 @@ ggplot(mal_dat_asex_known_vector, aes(x = value, y= Upper))+ geom_point(aes(colo
                                                                               size =3 )+
   geom_boxplot(alpha = 0.3)+theme_classic()+
   xlab("")+ ylab("Maximum observed burst size")+
+  
 theme(legend.position = 'none',
   axis.text = element_text(size =14, color = 'black'))
+
+
+###Open/closed- experimental/wild
+### point style/color for host taxonomic groups
 

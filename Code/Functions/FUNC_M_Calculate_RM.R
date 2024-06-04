@@ -30,6 +30,7 @@ RM_Calculator <- function(species, x_list) {
   if (length(unique_mu_M_val) > 1) {
     stop("Ensure that each list element is unique!")
   }
+ 
 
   ### Burst size
   unique_B_V <- unique(x_list$B_V)
@@ -45,9 +46,19 @@ RM_Calculator <- function(species, x_list) {
     stop("Ensure that each list element is unique!")
   }
 
+  
+  p_mod <- switch(species,
+                  "PC" = unique_p_val * 4.0e-6,
+                  "PF" = unique_p_val * 8.35e-6)
+  
+  mu_mod <- switch(species,
+                   "PC" =  unique_mu_M_val * 48,
+                   "PF" =  unique_mu_M_val* 200)
+
   ### The rate is then calculated here
   rate <- time_delayer * (1 - unique_C_V) * unique_B_V *
-    ((x_list[, "R"] * unique_p_val) / ((unique_p_val * x_list[, "R"]) + unique_mu_M_val ))
+    ((x_list[, "R"] *  p_mod) / (( p_mod * x_list[, "R"]) +   mu_mod))
 
   return(rate)
+  
 }
