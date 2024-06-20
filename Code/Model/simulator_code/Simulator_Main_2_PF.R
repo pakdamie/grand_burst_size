@@ -15,6 +15,7 @@ Simulator_Malaria_BC_PF <- function(B_V,
                                     C_V,  
                                     p_val,
                                     mu_M, 
+                                    alpha_1,
                                     R_Modifier,
                                     initialvalue, 
                                     include_death) {
@@ -27,7 +28,7 @@ Simulator_Malaria_BC_PF <- function(B_V,
     muI = 1 / 120, # Daily mortality rate of infected red blood cells (SimulatedTimeSeries.R)
     c = C_V, # transmission investment (Vary)
     B = B_V, # the burst size (Vary)
-    alpha1 = 1 / 2, # the rate of development of parasite in iRBC (SimulatedTimeSeries.R)
+    alpha1 = alpha_1 * (1 / 2), # the rate of development of parasite in iRBC (SimulatedTimeSeries.R)
     alpha2 = 1 / 7, # the rate of development (SimulatedTimeSeries.R)
     muM = mu_M * 200, # background mortality of the merozoite (SimulatedTimeSeries.R)
     muG = log(2) / 2.4, # background mortality of the immature/mature gametocytes (SimulatedTimeSeries.R)
@@ -62,8 +63,6 @@ Simulator_Malaria_BC_PF <- function(B_V,
     return(y["R"] - 380000)
   }
 
-
-
   if (include_death == "No") {
     ### Does not include the rootfun
 
@@ -83,13 +82,18 @@ Simulator_Malaria_BC_PF <- function(B_V,
       rootfun = rootfun
     )
   }
+  
+  I_count = rowSums(out_DDE[,3:12])
+  
   return(data.frame(out_DDE[, c("time", "R", "G")],
+                 #    I_count,
     B_V = B_V,
     C_V = C_V,
     initialvalue = initialvalue,
     p_val = p_val,
     mu_M = mu_M,
     R_Modifier = R_Modifier,
+    alpha_1 = alpha_1,
     infection_length =
       ifelse(!is.null(attributes(out_DDE)$troot),
         attributes(out_DDE)$troot,
@@ -103,7 +107,8 @@ Simulator_Malaria_BC_PF <- function(B_V,
 
 
 Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V,  p_val,
-                                           mu_M, R_Modifier, initialvalue, endtime) {
+                                           mu_M, alpha_1,
+                                           R_Modifier, initialvalue, endtime) {
   parameters_n <-
     c(
       lambda = 2e5, # replenishment rate of RBC (#SimulatedTimeSeries.R)
@@ -113,7 +118,7 @@ Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V,  p_val,
       muI = 1 / 120, # Daily mortality rate of infected red blood cells (SimulatedTimeSeries.R)
       c = C_V, # transmission investment (Vary)
       B = B_V, # the burst size (Vary)
-      alpha1 = 1 / 2, # the rate of development of parasite in iRBC (SimulatedTimeSeries.R)
+      alpha1 = alpha_1 * (1 / 2), # the rate of development of parasite in iRBC (SimulatedTimeSeries.R)
       alpha2 = 1 / 7, # the rate of development (SimulatedTimeSeries.R)
       muM = mu_M * 200, # background mortality of the merozoite (SimulatedTimeSeries.R)
       muG = log(2) / 2.4, # background mortality of the immature/mature gametocytes (SimulatedTimeSeries.R)
@@ -150,5 +155,5 @@ Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V,  p_val,
   )
 
 
-  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V,p_val = p_val,mu_M = mu_M, R_Modifier = R_Modifier))
+  return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V,p_val = p_val,mu_M = mu_M, R_Modifier = R_Modifier,  alpha_1 = alpha_1))
 }

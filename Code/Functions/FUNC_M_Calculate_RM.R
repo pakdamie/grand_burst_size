@@ -15,12 +15,6 @@ RM_Calculator <- function(species, x_list) {
     for P.falciparum")
   }
   
-  ### Time delay
-  time_delayer <- switch(species,
-    "PC" = ((100 * (1))^100) / ((100 * (1) + 0.025))^100,
-    "PF" = ((10 * (1 / 2))^10) / ((10 * (1 / 2) + (1 / 120)))^10
-  )
-  
   unique_p_val <- unique(x_list$p_val)
   if (length( unique_p_val ) > 1) {
     stop("Ensure that each list element is unique!")
@@ -30,22 +24,38 @@ RM_Calculator <- function(species, x_list) {
   if (length(unique_mu_M_val) > 1) {
     stop("Ensure that each list element is unique!")
   }
- 
-
+  
   ### Burst size
   unique_B_V <- unique(x_list$B_V)
-
+  
   if (length(unique_B_V) > 1) {
     stop("Ensure that each list element is unique!")
   }
-
+  
   ### Transmission investment
   unique_C_V <- unique(x_list$C_V)
-
+  
   if (length(unique_C_V) > 1) {
     stop("Ensure that each list element is unique!")
   }
-
+  
+  
+  unique_alpha_val <- unique(x_list$alpha_1)
+  if (length( unique_alpha_val) > 1) {
+    stop("Ensure that each list element is unique!")
+  }
+  
+  
+  alpha_mod <- switch(species,
+                      "PC" =  (unique_alpha_val) * 1,
+                      "PF" =  (unique_alpha_val) * 1/2)
+  
+  ### Time delay
+  time_delayer <- switch(species,
+    "PC" = ((100 * (alpha_mod ))^100) / ((100 * (alpha_mod) + 0.025))^100,
+    "PF" = ((10 * (alpha_mod ))^10) / ((10 * (alpha_mod ) + (1 / 120)))^10
+  )
+ 
   
   p_mod <- switch(species,
                   "PC" = unique_p_val * 4.0e-6,
@@ -57,7 +67,7 @@ RM_Calculator <- function(species, x_list) {
 
   ### The rate is then calculated here
   rate <- time_delayer * (1 - unique_C_V) * unique_B_V *
-    ((x_list[, "R"] *  p_mod) / (( p_mod * x_list[, "R"]) +   mu_mod))
+    ((x_list[, "R"] *  p_mod) / (( p_mod * x_list[, "R"]) + mu_mod))
 
   return(rate)
   

@@ -11,7 +11,7 @@
 ### Output: A single value of RM. Initial RM must be greater than this
 ### value for the infection to establish
 
-Calculate_Initial_RM <- function(species, p_val, mu_M, R_modifier) {
+Calculate_Initial_RM <- function(species, p_val, mu_M, R_modifier, alpha_1) {
   
   if (!(species %in% c("PC", "PF"))) {
     stop("Invalid input, either input `PC` for P. chabaudi or `PF`
@@ -19,25 +19,30 @@ Calculate_Initial_RM <- function(species, p_val, mu_M, R_modifier) {
   }
 
   initial_RM_modifier <- 1.5 # The threshold for establishment.
-
-  ### We need to include the time delayer (check methods)
-  time_delayer <- switch(species,
-    "PC" = ((100 * (1 / 1) + (1 / 40))^100) / (100 * (1 / 1))^100,
-    "PF" = ((10 * (1 / 2) + (1 / 120))^10) / (10 * (1 / 2))^10
-  )
-
+  
+  alpha_mod <- switch(species,
+                     "PC" = alpha_1 * 1,
+                     "PF" = alpha_1 * 1/2)
   
   p_mod <- switch(species,
                   "PC" = p_val * 4.0e-6,
                   "PF" = p_val * 8.35e-6)
-
-  mu_mod <- switch(species,
-                  "PC" = mu_M * 48,
-                  "PF" = mu_M* 200)
-  R_mod <- switch(species,
-                   "PC" = R_modifier *  8500000,
-                   "PF" = R_modifier * 5e6)
   
+  mu_mod <- switch(species,
+                   "PC" = mu_M * 48,
+                   "PF" = mu_M* 200)
+  R_mod <- switch(species,
+                  "PC" = R_modifier *  8500000,
+                  "PF" = R_modifier * 5e6)
+  
+  ### We need to include the time delayer (check methods)
+  time_delayer <- switch(species,
+    "PC" = ((100 * ( alpha_mod ) + (1 / 40))^100) / (100 * ( alpha_mod ))^100,
+    "PF" = ((10 * ( alpha_mod) + (1 / 120))^10) / (10 * ( alpha_mod ))^10
+  )
+
+
+ 
   
   
 

@@ -18,6 +18,7 @@ Simulator_Malaria_BC_PC <- function(B_V,
                                     C_V, 
                                     p_val ,
                                     mu_M,
+                                    alpha_1,
                                     initialvalue, 
                                     R_Modifier,
                                     include_death) {
@@ -31,7 +32,7 @@ Simulator_Malaria_BC_PC <- function(B_V,
       muI = 0.025, # Daily mortality rate of infected red blood cells
       c = C_V, # Transmission investment (THE VARYING FACTOR)
       B = B_V, # The burst size (THE VARYING FACTOR)
-      alpha1 = 1, # The rate of development of parasite in iRBC
+      alpha1 = (alpha_1) * 1, # The rate of development of parasite in iRBC
       alpha2 = 1 / 2, # The rate of development for the gametocytes
       muM =  mu_M * 48, # Background mortality of the merozoite
       muG = 4, # Background mortality of the immature/mature gametocytes
@@ -90,6 +91,7 @@ Simulator_Malaria_BC_PC <- function(B_V,
     p_val = p_val,
     mu_M = mu_M,
     R_modifier  = R_Modifier,
+    alpha_1 = alpha_1,
     infection_length =
       ifelse(!is.null(attributes(out_DDE)$troot),
         attributes(out_DDE)$troot,
@@ -107,6 +109,7 @@ Simulator_MalariaPC_DDE_BC_Cut <- function(B_V,
                                            C_V, 
                                            p_val,
                                            mu_M,
+                                           alpha_1,
                                            initialvalue, 
                                            R_Modifier,
                                            endtime) {
@@ -120,7 +123,7 @@ Simulator_MalariaPC_DDE_BC_Cut <- function(B_V,
       muI = 0.025, # Daily mortality rate of infected red blood cells
       c = C_V, # Transmission investment (THE VARYING FACTOR)
       B = B_V, # The burst size (THE VARYING FACTOR)
-      alpha1 = 1, # The rate of development of parasite in iRBC
+      alpha1 = (alpha_1) *1, # The rate of development of parasite in iRBC
       alpha2 = 1 / 2, # The rate of development
       muM = mu_M * 48, # Background mortality of the merozoite
       muG = 4, # Background mortality of the immature/mature gametocytes
@@ -153,5 +156,5 @@ Simulator_MalariaPC_DDE_BC_Cut <- function(B_V,
 
   
   return(data.frame(out_DDE[, c("time", "R", "G")], B_V = B_V, C_V = C_V, p_val = p_val,
-                    mu_M = mu_M,  R_Modifier  = R_Modifier))
+                    mu_M = mu_M,  R_Modifier  = R_Modifier, alpha_1 = alpha_1 ))
 }

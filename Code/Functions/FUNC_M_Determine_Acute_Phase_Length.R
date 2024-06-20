@@ -85,6 +85,11 @@ Finder_RM <- function(x_list, species) {
       stop("Ensure that each list element is unique!")
     }
     
+    unique_alpha_val <- unique(x_list$alpha_1)
+    if (length( unique_alpha_val) > 1) {
+      stop("Ensure that each list element is unique!")
+    }
+    
       RM_time_df <- cbind.data.frame(
         time = x_list[, "time"],
         rate = RM_Calculator(species, x_list),
