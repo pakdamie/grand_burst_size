@@ -25,7 +25,7 @@ Simulate_Infection <- function(species, initial_value = "default",
   ### parameter combinations we want to simulate
 
   ### Burst Size and Transmission Investment ###
-  B_V <- seq(1, 50, 0.5) # Burst size
+  B_V <- seq(1, 100, 1) # Burst size
 
   if (is.na(C_V_specific) == TRUE) {
     C_V <- seq(0.01, 1, 0.01) # Transmission investment
@@ -36,18 +36,18 @@ Simulate_Infection <- function(species, initial_value = "default",
   ### If the variable of interest is "pmax'
   if (is.na(variable_interest) == FALSE & variable_interest == "pmax") {
     ### Invasion rate
-    p_val <- seq(0.01, 5.90, length = 10)
+    p_val <- c(c(1e-5,1e-4,1e-3,0.01,0.05,0.10,0.25,0.50,0.75,1),seq(2,4,length = 10),seq(5,100,5))
     alpha1 <- 1
     mu_M <- 1
     R_Modifier <- 1
     
   } else if (is.na(variable_interest) == FALSE & variable_interest == "mu_M") {
-    mu_M <- seq(0.01, 10, length = 10)
+    mu_M <- c(c(1e-5,1e-4,1e-3, 0.01,0.05,0.10,0.25,0.50,0.75,1),seq(2,4,length = 5),seq(5,100,5))
     p_val <- 1
     R_Modifier <- 1
     alpha1 <- 1
   } else if (is.na(variable_interest) == FALSE & variable_interest == "R_Modifier") {
-    R_Modifier <- seq(0.01, 5.90, length = 10)
+    R_Modifier <- c(c(1e-5,1e-4,1e-3, 0.01,0.05,0.10,0.25,0.50,0.75,1),seq(2,4,length = 5),seq(5,100,5))
     p_val <- 1
     mu_M <- 1
     alpha1 <- 1
