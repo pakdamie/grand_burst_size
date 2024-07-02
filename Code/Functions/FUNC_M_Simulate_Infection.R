@@ -52,7 +52,7 @@ Simulate_Infection <- function(species, initial_value = "default",
     mu_M <- 1
     alpha1 <- 1
   } else if (is.na(variable_interest) == FALSE & variable_interest == "alpha1") {
-    alpha1 <- seq(0.25, 7, length = 10)
+    alpha1 <- c(c(0.25,0.50,0.75,1),seq(2,5,length = 20))
     p_val <- 1
     mu_M <- 1 
     R_Modifier <- 1

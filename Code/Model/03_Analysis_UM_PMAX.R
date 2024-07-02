@@ -121,6 +121,38 @@ ggplot(Fitness_R_Modifier_All, aes(
     axis.title = element_text(color = "black", size = 14)
   ) + ylim(0,100)
 
+ggsave(here("Figures", "Raw", "Variable_Interest_InitialRBC.pdf"),
+       height = 5,
+       width = 8, units = "in"
+)
+Fitness_alpha_1_All<- Rescale_Rate_Variable_Interest(Fitness_MODEL_PC_alpha1 ,
+                                                        Fitness_MODEL_PF_alpha1 , "alpha_1")
+
+
+ggplot(Fitness_alpha_1_All, aes(
+  x = alpha_1_rescale,
+  y = B_V, group = species, color = species
+)) +
+  geom_line(linewidth = 0.9) +
+  geom_point(
+    data = subset(
+      Fitness_alpha_1_All,
+      Fitness_alpha_1_All$controlornot == "control"
+    ),
+    aes(color = species), size = 3
+  ) +
+  scale_color_manual(name = "", values = c("#2e2d84", "#ee4493")) +
+  theme_classic() +
+  xlab("Asexual cycle (days)") +
+  ylab("Optimal burst size") +
+  theme(
+    axis.text = element_text(color = "black", size = 14),
+    axis.title = element_text(color = "black", size = 15)
+  ) + ylim(0,100)
+ggsave(here("Figures", "Raw", "Variable_Interest_alpha_1.pdf"),
+       height = 5,
+       width = 6, units = "in"
+)
 
 
 Plot_Simulation(Fitness_R, "R_Modifier", "R_Modifier")
