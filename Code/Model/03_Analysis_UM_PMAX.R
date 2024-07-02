@@ -123,7 +123,7 @@ ggplot(Fitness_R_Modifier_All, aes(
 
 ggsave(here("Figures", "Raw", "Variable_Interest_InitialRBC.pdf"),
        height = 5,
-       width = 8, units = "in"
+       width = 6, units = "in"
 )
 Fitness_alpha_1_All<- Rescale_Rate_Variable_Interest(Fitness_MODEL_PC_alpha1 ,
                                                         Fitness_MODEL_PF_alpha1 , "alpha_1")
@@ -153,8 +153,4 @@ ggsave(here("Figures", "Raw", "Variable_Interest_alpha_1.pdf"),
        height = 5,
        width = 6, units = "in"
 )
-
-
-Plot_Simulation(Fitness_R, "R_Modifier", "R_Modifier")
-Plot_Simulation(Fitness_alpha1, "alpha_1", "alpha_1") + geom_vline(xintercept = 1)
 
