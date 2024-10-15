@@ -1,36 +1,25 @@
-### @ 00_full_HOST_phylogeny_tree.R
-### This is the script for creating the full phylogeny for the
-### mammal, avian, and reptile hosts.
-### This script is specifically for cleaning up the host phylogeny
-### data and is then subsetted for subsequent analyses.
+# This is the main script for creating the full phylogeny for the
+# mammal (MAM), avian (AVE), and reptile (REP) hosts.
 
-### REPTILE
 REP_Phylo <- read.nexus(here("Data", "Reptile", "reptile_phylo_1000.nex"))
-### 1000 phylogenetic tree
-
-### AVIAN
 AVE_Phylo <- read.nexus(here("Data", "Avian", "avian_phylo_1000.nex"))
-### 1000 phylogenetic tree
-
-### MAMMAL
 MAM_Phylo <- read.nexus(here("Data", "Mammal", "mammal_phylo_1000.nex"))
-### 1000 phylogenetic trees
 
-### Because the trees are all 1000-
-### I'm going to create a consensus tree (these have no branch lengths)
-### p = 0.5 means that it's majority rule consensus
+# There are a 1000 trees so I am creating a consensus tree 
+# (these have no branch lengths). The p = 0.5 means that it's 
+# majority rule consensus
 
 consensus_AVE_Tree <- consensus(AVE_Phylo, p = 0.5, check.labels = TRUE, rooted = TRUE)
 consensus_REP_Tree <- consensus(REP_Phylo, p = 0.5, check.labels = TRUE, rooted = TRUE)
 consensus_MAM_Tree <- consensus(MAM_Phylo, p = 0.5, check.labels = TRUE, rooted = TRUE)
 
-### Random polytomy resolving
+### We can use `multi2di` to randomly resolve phylogeny
 consensus_AVE_Tree <- multi2di(consensus_AVE_Tree, random = TRUE)
 consensus_REP_Tree <- multi2di(consensus_REP_Tree, random = TRUE)
 consensus_MAM_Tree <- multi2di(consensus_MAM_Tree, random = TRUE)
 
-### THIS PART IS FOR CREATING A SUPER TREE that
-### has both reptile, mammal, and avian hosts.
+# To merge these trees together, we create a super tree
+#that has both reptile, mammal, and avian hosts.
 
 tip.labels <- c("mam", "birds", "squam")
 

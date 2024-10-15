@@ -3,10 +3,8 @@ source(here("Code", "Functions", "FUNC_Package_Loader.R"))
 ### Main modeling code
 source(here("Code", "Model", "simulator_code", "Simulator_Main_2_PC.R"))
 source(here("Code", "Model", "simulator_code", "Simulator_Main_2_PF.R"))
-
 #The main function
 source(here("Code", "Functions", "FUNC_M_Simulate_Infection.R"))
-
 #Calculates fitness
 source(here("Code", "Functions", "FUNC_M_Calculate_Fitness.R"))
 #Determines the acute phase length

@@ -21,11 +21,12 @@ Finder_RM <- function(x_list, species) {
     for P.falciparum")
   }
 
-  ### If it's NA that means that it never kills the host,
-  ### If it's a numeric value, that means it kills the host.
+  ### If NA: never killed the host,
+  ### If Numeric value: kills the host.
+        
   infection_length <- unique(x_list$infection_length)
 
-  ### If the infection has an actual length (aka NA is false)
+  ### If the infection has an actual length (is.NA is false)
   if (is.na(infection_length) == FALSE) {
     ### Look at the gametocyte time series
     ### Calculating the fitness
@@ -61,11 +62,11 @@ Finder_RM <- function(x_list, species) {
       end_fitness = end_fitness_mort,
       status = "mort"  ### This parameter combination leads to death.
     )
-  } else { #Else if the infection length has not yet been found!
+   } else { #Else if the infection length has not yet been found!
     
     ### Burst size
     unique_B_V <- unique(x_list$B_V)
-    if (length(   unique_B_V ) > 1) {
+    if (length(unique_B_V ) > 1) {
       stop("Ensure that each list element is unique!")
     }
 
@@ -90,7 +91,7 @@ Finder_RM <- function(x_list, species) {
       stop("Ensure that each list element is unique!")
     }
     
-      RM_time_df <- cbind.data.frame(
+    RM_time_df <- cbind.data.frame(
         time = x_list[, "time"],
         rate = RM_Calculator(species, x_list),
         B_V = unique_B_V,
@@ -98,13 +99,16 @@ Finder_RM <- function(x_list, species) {
       )
 
     ### Find when there lowest RM is (Should be lower than 1)
-      
     min_RM <- RM_time_df[which.min(RM_time_df$rate), ]
 
     if(min_RM$rate > 1){
-      stop("Yo something bad is happening, RM is greater than 1 - it didn't peak!")
-    }
-    
+            
+       df_acutephase_information  <- data.frame(
+                    endtime = "FAILURE",
+                    up_down = "FAILURE",
+                    end_fitness = NA,
+                    status = "FAILURE")
+       } else {
     ### The end of the acute phase is then
     ### Look for time after lowest RM peak (post peak)
     ### and when the RM is equal or greater than 1
@@ -123,7 +127,11 @@ Finder_RM <- function(x_list, species) {
       end_fitness = NA,
       status = "success"
     )
+    
   }
 
+   }
+  
   return(df_acutephase_information)
+  
 }

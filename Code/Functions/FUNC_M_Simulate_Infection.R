@@ -1,68 +1,59 @@
-### This is the function for simulating the infections
-### species = "PC" (chabaudi) or "PF" (falciparum)
-### initial value = initial inoculum,
-### C_V_specific = If NA, that means look at across 1% to 100%. If a value is
-### given, run it just for that.
-### The variable of interest should be either "mu_M' (mortality rate of merozoite),
-### R_Modifier (initial RBCs), 'pmax' (invasion rate), and 'alpha1',
-### these are multiplicative
-### modifiers
-Simulate_Infection <- function(species, initial_value = "default",
+#' Simulate the infection for either Plasmodium chabaudi or Plasmodium
+#' falciparum
+#'
+#'This is the main function for simulating infections that may either
+#'fail to establish, establish and kills the host (if user includes death),
+#'or successfully establishes and ends at the end of the acute phase. Because
+#'the parameters are different for P. chabaudi or P. falciparum, you have to
+#'specify which species you are interested in.
+#'
+#'
+#' @param species "PC" or "PF" for P. chabaudi or P. falciparum
+#' @param initial_value the initial value for inoculum (best to keep it default)
+#' @param C_V_specific the transmission investment of investment 
+#' @param variable_interest what parameter are you interested in varying
+#' @param include_death can host die (best to keep it default)
+#'
+#' @return A data.frame that gives you the end fitness across all strains
+#' (varying burst size and transmission investment combination)
+#' @export
+#'
+#' @examples Simulate_Infection(species = "PC", initial_value = "default",
+#' C_V_specific = NA, variable_interest = "pmax", include_death ="Yes")
+
+Simulate_Infection <- function(species, 
+                               initial_value = "default",
                                C_V_specific = NA,
                                variable_interest = NA,
                                include_death = "Yes") {
+  
+### Error checking.
   if (!(species %in% c("PC", "PF"))) {
     stop("Invalid input, either input `PC` for P. chabaudi or `PF`
     for P.falciparum")
   }
 
-  if (!(variable_interest %in% c("pmax", "R_Modifier", "mu_M", "alpha1"))) {
+  if (!(variable_interest %in% c("pmax", "R_Modifier", "mu_M", "alpha1","combo"))) {
     stop("Invalid input for variable_interest, either input 'pmax', `R_Modifier`,
-         `mu_M`, or 'alpha1")
+         `mu_M`, `combo`, or 'alpha1")
   }
 
   ### The first part of the model trying to figure out what
   ### parameter combinations we want to simulate
 
-  ### Burst Size and Transmission Investment ###
-  B_V <- seq(1, 100, 1) # Burst size
+  ### Burst Size.
+  B_V <- 11# Burst size
 
+  ### If no value is given to C_V_specific, then use the default
+  ### values.
   if (is.na(C_V_specific) == TRUE) {
     C_V <- seq(0.01, 1, 0.01) # Transmission investment
   } else {
     C_V <- C_V_specific
   }
 
-  ### If the variable of interest is "pmax'
-  if (is.na(variable_interest) == FALSE & variable_interest == "pmax") {
-    ### Invasion rate
-    p_val <- c(c(1e-5,1e-4,1e-3,0.01,0.05,0.10,0.25,0.50,0.75,1),seq(2,4,length = 10),seq(5,100,5))
-    alpha1 <- 1
-    mu_M <- 1
-    R_Modifier <- 1
-    
-  } else if (is.na(variable_interest) == FALSE & variable_interest == "mu_M") {
-    mu_M <- c(c(1e-5,1e-4,1e-3, 0.01,0.05,0.10,0.25,0.50,0.75,1),seq(2,4,length = 5),seq(5,100,5))
-    p_val <- 1
-    R_Modifier <- 1
-    alpha1 <- 1
-  } else if (is.na(variable_interest) == FALSE & variable_interest == "R_Modifier") {
-    R_Modifier <- c(c(1e-5,1e-4,1e-3, 0.01,0.05,0.10,0.25,0.50,0.75,1),seq(2,4,length = 5),seq(5,100,5))
-    p_val <- 1
-    mu_M <- 1
-    alpha1 <- 1
-  } else if (is.na(variable_interest) == FALSE & variable_interest == "alpha1") {
-    alpha1 <- c(c(0.25,0.50,0.75,1),seq(2,5,length = 20))
-    p_val <- 1
-    mu_M <- 1 
-    R_Modifier <- 1
-  } else if (is.na(variable_interest) == TRUE) {
-    p_val <- 1
-    mu_M <- 1
-    R_Modifier <- 1
-    alpha1 <- 1
-  }
-
+  ### If by chance you want to change the initial parasite number-
+  ### but use the default value if you have no reason to change it.
   if (initial_value == "default") {
     initial_value <- switch(species,
       "PC" = 4385.965,
@@ -72,21 +63,54 @@ Simulate_Infection <- function(species, initial_value = "default",
     initial_value <- initial_value
   }
 
+  ### Default modifiers of the variable of interest (multiplies the original
+  ### value).
+  p_val <- 1 # invasion rate
+  alpha1 <- 1 # development Rate
+  mu_M <- 1 # merozoite mortality rate
+  R_Modifier <- 1 # initial RBC
+
+
+  ###If the variable of interest is not NA, then what should the variable
+  ###of interest modifier be? I made it species specific due to weird
+  ###things happening at the boundaries.
+  
+  if (is.na(variable_interest) == FALSE & variable_interest == "R_Modifier") {
+    R_Modifier <- c(c(1e-5, 1e-4, 1e-3, 0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 1), seq(2, 4, length = 5), seq(5, 100, 5))
+  } else if (is.na(variable_interest) == FALSE & variable_interest == "alpha1") {
+    alpha1 <- switch(species,
+                           "PC" = c(1, 1/2,1/3 ,1/5,24, 48,96),
+                           "PF" =c(1, 2, 2/3, 2/7,48))
+  } else if (is.na(variable_interest) == FALSE & variable_interest == "combo") {
+    p_val <- c(0.01, 0.25, 0.50, 1, 1.25, 1.50)
+    
+    #mu_M
+    mu_M <- switch(species,
+                 "PC" = c(1, 288/48 ,200/48,1440/48, 1/2, 1/48, (1/7)/48),
+                 "PF" =c(1, 288/200,200, 48/200, 24/200, 1/200, (1/7)/200))
+  }
+
+
+  ### This is the main parameter
+  ### values that you use to feed into the
+  ### main simulation
+
   B_V_C_V <- expand.grid(
-    B_V = B_V,
-    C_V = C_V,
-    p_val = p_val,
-    mu_M = mu_M,
-    R_Modifier = R_Modifier,
-    alpha_1 = alpha1,
-    initialvalue = initial_value
+    B_V = B_V, #burst size
+    C_V = C_V, #transmission investment
+    p_val = p_val, #invasion rate
+    mu_M = mu_M, #mu_M
+    R_Modifier = R_Modifier, #Initial RBC 
+    alpha_1 = 48, #asexual development time
+    initialvalue = initial_value #initial RBC
   )
 
-  ### We can already take out parameter combinations that would not
+  ### We can already take out parameter combinations that would NOT
   ### lead to the establishment of infection by looking at the initial
   ### RM threshold
 
-  Initial_RMs <- mcmapply(Calculate_Initial_RM,
+  Initial_RMs <- mcmapply(
+    Calculate_Initial_RM,
     species = species,
     p_val = c(B_V_C_V$p_val),
     mu_M = c(B_V_C_V$mu_M),
@@ -96,10 +120,11 @@ Simulate_Infection <- function(species, initial_value = "default",
     SIMPLIFY = FALSE
   )
 
+
+  ### Bind it to the data.frame
   B_V_C_V$Initial_RM <- do.call(rbind, Initial_RMs)
 
-
-  ### If the replicative capacity (1-CV)B is greater than the RM threshold,
+  ### If the replicative capacity (1-CV) B is greater than the RM threshold,
   ### then the infection is established.
 
   B_V_C_V$Establish <- ifelse((1 - B_V_C_V$C_V) * B_V_C_V$B_V >= B_V_C_V$Initial_RM,
@@ -111,20 +136,19 @@ Simulate_Infection <- function(species, initial_value = "default",
   B_V_C_V_F <- subset(B_V_C_V, B_V_C_V$Establish == "Establish")
 
   ### We then use the B_V_C_V_F as the variable list to run our model.
-
   ### Using our simulator specific to the species
   model_sim <- switch(species,
     "PC" = Simulator_Malaria_BC_PC,
     "PF" = Simulator_Malaria_BC_PF
   )
-  
+
   ### Run the Full Model
   FULL_MODEL <- mcmapply(model_sim,
-    B_V = c(B_V_C_V_F$B_V),
+    B_V =11.1,
     C_V = c(B_V_C_V_F$C_V),
     p_val = c(B_V_C_V_F$p_val),
     mu_M = c(B_V_C_V_F$mu_M),
-    alpha_1 =c(B_V_C_V_F$alpha_1),
+    alpha_1 = c(B_V_C_V_F$alpha_1),
     initialvalue = c(B_V_C_V_F$initialvalue),
     R_Modifier = c(B_V_C_V_F$R_Modifier),
     include_death = c(include_death),
@@ -161,7 +185,7 @@ Simulate_Infection <- function(species, initial_value = "default",
   Duration_Initial$C_V <- B_V_C_V_F$C_V
   Duration_Initial$p_val <- B_V_C_V_F$p_val
   Duration_Initial$mu_M <- B_V_C_V_F$mu_M
-  Duration_Initial$alpha_1<- B_V_C_V_F$alpha_1
+  Duration_Initial$alpha_1 <- B_V_C_V_F$alpha_1
   Duration_Initial$R_Modifier <- B_V_C_V_F$R_Modifier
 
 
@@ -199,32 +223,32 @@ Simulate_Infection <- function(species, initial_value = "default",
     Duration_Initial$status == "success"
   )
 
-
   ### Simulate with the cut-data
   model_sim_cut <- switch(species,
     "PC" = Simulator_MalariaPC_DDE_BC_Cut,
     "PF" = Simulator_MalariaPF_DDE_BC_Cut
   )
 
-  
-  ###This is now the full model simulation where we run it until
+  ### This is now the full model simulation where we run it until
   ### the acute phase
   if (nrow(Duration_Initial_SUCCESS) != 0) {
-    Fitness_MODEL <- mcmapply(model_sim_cut,
-      B_V = c(Duration_Initial_SUCCESS$B_V),
-      C_V = c(Duration_Initial_SUCCESS$C_V),
-      p_val = c(Duration_Initial_SUCCESS$p_val),
-      mu_M = c(Duration_Initial_SUCCESS$mu_M),
-      alpha_1 = c(Duration_Initial_SUCCESS$alpha_1),
-      R_Modifier = c(Duration_Initial_SUCCESS$R_Modifier),
-      initialvalue = c(initial_value),
-      endtime = c(Duration_Initial_SUCCESS$endtime),
-      mc.cores = 3,
-      SIMPLIFY = FALSE
+        Fitness_MODEL <- mcmapply(model_sim_cut,
+                         B_V = c(Duration_Initial_SUCCESS$B_V),
+                         C_V = c(Duration_Initial_SUCCESS$C_V),
+                         p_val = c(Duration_Initial_SUCCESS$p_val),
+                         mu_M = c(Duration_Initial_SUCCESS$mu_M),
+                         alpha_1 = c(Duration_Initial_SUCCESS$alpha_1),
+                         R_Modifier = c(Duration_Initial_SUCCESS$R_Modifier),
+                         initialvalue = c(initial_value),
+                         endtime = c(Duration_Initial_SUCCESS$endtime),
+                         mc.cores = 3,
+                         SIMPLIFY = FALSE
     )
 
     Duration_Initial_SUCCESS$end_fitness <-
-      unlist(lapply(Fitness_MODEL, Gametocyte_Fitness, species = species))
+      unlist(lapply(Fitness_MODEL, 
+                    Gametocyte_Fitness, 
+                    species = species))
   } else {
     Duration_Initial_SUCCESS <- NA
   }

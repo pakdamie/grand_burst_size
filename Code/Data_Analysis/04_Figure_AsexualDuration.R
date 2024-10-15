@@ -11,13 +11,11 @@ duration_burst_size_GG <- ggplot(
   aes(
     x = (Duration),
     y = Upper,
-    fill = Duration,
     group = Duration
   )
-) +
-  geom_violin(alpha = 0.2, color = NA) +
+) +geom_point()
+  geom_violin(alpha = 0.2, color = NA, fill = 'blue') +
   geom_beeswarm(size = 3.0, shape = 21, cex = 1.2, color = "NA") +
-  scale_fill_viridis(option = "turbo") +
   scale_x_continuous(breaks = c(0, 24, 36, 48, 60, 72, 84, 96)) +
   scale_y_continuous(
     limits = c(0, 40),
@@ -34,3 +32,4 @@ duration_burst_size_GG <- ggplot(
 
 ggsave(here("Figures", "Raw", "duration_ggplot.pdf"), width =10, height = 9, 
        units = 'in')
+

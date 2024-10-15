@@ -1,8 +1,5 @@
-###@ 00_full_PARASITE_phylogeny_tree.R
-
-### This is the full phylogeny for the Plasmodium species 
-### This script is specifically for cleaning up the Plasmoidum phylogeny 
-### data.
+# This is the main script for creating the full phylogeny for the
+# parasite
 
 source(here("Code", "Functions","FUNC_renamer_label.R"))
 
@@ -19,7 +16,7 @@ matching_Plas_string<- plasmodium_tree$tip.label[grep("^Plas_", plasmodium_tree$
 ### Come vector of Plasmoidum species name
 Plasmodium_species_names <- c("Deer_Malaria",matching_P_string, matching_Plas_string)
 
-###This is the tree with only plasmodium species
+###This is the tree with only Plasmodium species
 plasmodium_tree_full <- keep.tip(plasmodium_tree , Plasmodium_species_names ) 
 
 ###Giving the tree a new label- CHECK to make sure!
