@@ -12,13 +12,13 @@ sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_CUT.cpp"))
 sourceCpp(here("Code", "Model", "rcpp", "rcpp_malaria_dynamics_UNCUT.cpp"))
 
 Simulator_Malaria_BC_PF <- function(B_V, 
-                                    C_V,  
-                                    p_val,
-                                    mu_M, 
-                                    alpha_1,
-                                    R_Modifier,
-                                    initialvalue, 
-                                    include_death) {
+  C_V,  
+  p_val,
+  mu_M, 
+  alpha_1,
+  R_Modifier,
+  initialvalue, 
+  include_death) {
   
   parameters_n <- c(
     lambda = 2e5, # replenishment rate of RBC (#SimulatedTimeSeries.R)
@@ -54,7 +54,7 @@ Simulator_Malaria_BC_PF <- function(B_V,
   )
 
   ### Daily time steps
-  times <- seq(0, 100, by = 1 / 10)
+  times <- seq(0, 300, by = 1 / 10)
 
 
   ### Mortality function: If the red blood cells hit this threshold,
@@ -66,11 +66,13 @@ Simulator_Malaria_BC_PF <- function(B_V,
   if (include_death == "No") {
     ### Does not include the rootfun
 
-    out_DDE <- ode(
+    out_DDE <- lsoda(
       y = inits_n,
       times = times,
       func = Erlang_Malaria,
-      parms = parameters_n
+      parms = parameters_n,
+      rtol = 1e-6, 
+      atol = 1e-6
     )
   } else {
     # Includes the rootfun
@@ -79,14 +81,13 @@ Simulator_Malaria_BC_PF <- function(B_V,
       times = times,
       func = Erlang_Malaria,
       parms = parameters_n,
-      rootfun = rootfun
+      rootfun = rootfun,
+      rtol = 1e-6, 
+      atol = 1e-6,
+      method = "lsodar"
     )
   }
-  
-  I_count = rowSums(out_DDE[,3:12])
-  
   return(data.frame(out_DDE[, c("time", "R", "G")],
-                 #    I_count,
     B_V = B_V,
     C_V = C_V,
     initialvalue = initialvalue,
@@ -145,13 +146,15 @@ Simulator_MalariaPF_DDE_BC_Cut <- function(B_V, C_V,  p_val,
   )
 
   ### Daily time steps
-  times <- seq(0, 100, by = 1 / 10)
+  times <- seq(0, 300, by = 1 / 10)
 
 
-  out_DDE <- ode(
+  out_DDE <- lsoda(
     y = inits_n, times = times,
     func = Erlang_Malaria_Cut,
-    parms = parameters_n
+    parms = parameters_n,
+    rtol = 1e-6, 
+    atol = 1e-8
   )
 
 

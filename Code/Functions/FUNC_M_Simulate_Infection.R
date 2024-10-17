@@ -86,8 +86,8 @@ if (!is.na(variable_interest) && variable_interest == "R_Modifier") {
 
 } else if (!is.na(variable_interest) && variable_interest == "alpha1") {
   alpha1 <- switch(species,
-    "PC" = c(1, 1/2, 1/3, 1/5, 24, 48, 96),
-    "PF" = c(1, 2, 2/3, 2/7, 48)
+    "PC" = c(1, 1/2, 1/3, 1/5, 1/6, 24, 48, 96),
+    "PF" = c(1, 2, 2/3, 2/7, 4 )
   )
   
 } else if (!is.na(variable_interest) && variable_interest == "combo") {

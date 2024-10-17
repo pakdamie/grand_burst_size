@@ -16,14 +16,14 @@ duration_burst_size_GG <- ggplot(
     group = Duration
   )
 ) + geom_point() + 
-  geom_violin(alpha = 0.23, color = NA, fill = '#3D007F') +
+  geom_violin(alpha = 0.23, color = NA, fill = "#fe64a3") +
   geom_beeswarm(size = 3.0, shape = 21, cex = 1.2, color = "NA") +
   scale_x_continuous(breaks = c(0, 24, 36, 48, 60, 72, 84, 96)) +
   scale_y_continuous(
-    limits = c(0, 40),
-    breaks = seq(0, 40, 5)
+    limits = c(0, 100),
+    breaks = seq(0, 100, 25)
   ) +
-  xlab("Duration (hours)") +
+  xlab("Asexual cycle duration (days)") +
   ylab("Maximum observed burst size") +
   theme_classic() +
   theme(

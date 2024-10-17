@@ -26,16 +26,16 @@ ifelse(dir.exists(here("Output/Fitness_Model")) == FALSE,
 
 ###Merozoite mortality and invasion rate
 Fitness_MODEL_PC_combo <- Simulate_Infection(
-  "PC", C_V_specific = 0.1,
+  "PC", C_V_specific = 0.10,
   variable_interest ='combo')
 
 Fitness_MODEL_PF_combo <- Simulate_Infection(
-  "PF", C_V_specific = 0.1, 
+  "PF", C_V_specific = 0.10, 
   variable_interest ='combo')
 
 ###Alpha duration
 Fitness_MODEL_PC_alpha1 <- Simulate_Infection(
-  "PC", C_V_specific = 0.1, 
+  "PC", C_V_specific = 0.10, 
   variable_interest ='alpha1')
 
 Fitness_MODEL_PF_alpha1 <- Simulate_Infection(
@@ -44,10 +44,10 @@ Fitness_MODEL_PF_alpha1 <- Simulate_Infection(
 
 #Initial red blood cell availability
 Fitness_MODEL_PC_R <- Simulate_Infection(
-  "PC", C_V_specific = 0.76, 
+  "PC", C_V_specific = 0.10, 
   variable_interest ='R_Modifier')
 Fitness_MODEL_PF_R <- Simulate_Infection(
-  "PF", C_V_specific = 0.1, 
+  "PF", C_V_specific = 0.10, 
   variable_interest ='R_Modifier')
 
 # Surface plots for both the merozoite mortality 
@@ -119,84 +119,73 @@ ggsave(here("Figures","Raw",
 Fitness_R_Modifier_All <- Rescale_Rate_Variable_Interest(
   Fitness_MODEL_PC_R, Fitness_MODEL_PF_R, "R_Modifier")
 
-ggplot(
+model_RBC_GG <- ggplot(
   Fitness_R_Modifier_All,
-  aes(x = log10(R_Modifier_rescale), 
-    y = as.factor(B_V),
-    group = species)) + 
+  aes(x = 
+    (R_Modifier_rescale), 
+    y = B_V,
+    group = species,
+    linetype = species)) + 
   geom_line(size = 0.6) +
-  annotate("rect", xmin= 3-0.5, xmax = 3+0.5, ymin =4 - 0.5, ymax =4+0.5, 
-    colour = 'black', fill = NA, size = 2)+
-  scale_fill_viridis(option = 'inferno' ,
-    name = "Burst size",limit= c(0,2)) +
-  scale_x_discrete(drop = FALSE,label = Time_mod)+
-  scale_y_discrete(expand=c(0,0), label = Multiplier)+
-  xlab("Merozoite Lifespan")+
-  ylab("Invasion multiplier")+
-  coord_equal()+
-  theme_classic()+
-  theme(panel.background = element_rect(fill = 'white'),
-    axis.text = element_text(size = 14,color = 'black'),
-    axis.title = element_text(size = 15, color = 'black'),
-    axis.title.x = element_text(vjust = -1),
-    axis.title.y = element_text(vjust = 1.5))
+  geom_point(data = subset(Fitness_R_Modifier_All,
+    Fitness_R_Modifier_All$controlornot == 'control'),
+    aes(x =(R_Modifier_rescale), y = B_V)) +
+  scale_linetype_manual(name = '', values = c(1,2)) +
+  scale_x_log10(
+    limits = c(10^6.25, 10^7.75),
+    breaks = 10^seq(6.25, 7.75, by = 0.25),  # From 10^5 to 10^8 in steps of 0.5
+    labels = scales::trans_format("log10", scales::math_format(10^.x))) + 
+  scale_y_continuous(limits = c(0,100))+
+  xlab(expression("Initial RBCs ("*mu*"L"^-1*")")) +
+  ylab("Optimal burst size") +
+  theme_classic() + 
+  theme(axis.text  = element_text(size = 14, color = 'black'),
+        axis.title = element_text(size = 15, color = 'black'),
+        legend.position = c(0.80,0.95))
 
 
+data_RBC_GG + model_RBC_GG 
 
-
-
-
-
-
-
-
-R_Modifier_GG + scale_x_log10(breaks = trans_breaks("log10", function(x) 10^x),
-                      labels = trans_format("log10", math_format(10^.x))) 
-
-
-
-ggsave(here("Figures",  "Variable_Interest_InitialRBC.pdf"),
-       height = 5,
-       width = 6, units = "in"
-)
-
-
-
-
-
+ggsave(here("Figures","Raw", 
+            "R_Modifier_Scatter_PC_PF.pdf"), 
+       width = 10, height = 5, units = "in")
 
 
 
 ###Asexual development time
 
-Fitness_alpha_1_All <- Rescale_Rate_Variable_Interest(Fitness_MODEL_PC_alpha1 ,
-                                                        Fitness_MODEL_PF_alpha1 , 
-                                                       "alpha_1")
+Fitness_alpha_1_All <- Rescale_Rate_Variable_Interest(
+  Fitness_MODEL_PC_alpha1, 
+  Fitness_MODEL_PF_alpha1, 
+  "alpha_1")
 
 
-alpha1_GG <- ggplot(Fitness_alpha_1_All, aes(
+alpha1_GG <- ggplot(
+  Fitness_alpha_1_All, aes(
   x = alpha_1_rescale,
-  y = B_V, group = species, color = species,
-  linetype = species
-)) +
-  geom_line(linewidth = 0.8) +
-  geom_point(
-    data = subset(
-      Fitness_alpha_1_All,
-      Fitness_alpha_1_All$controlornot == "control"
-    ),
-    aes(color = species), size = 3
-  ) +
-  theme_classic() +
-  xlab("Asexual cycle (days)") +
-  ylab("Optimal burst size") +
-  theme(legend.position = 'top',
-    axis.text = element_text(color = "black", size = 14),
-    axis.title = element_text(color = "black", size = 15)
-  ) + ylim(0,100)
-ggsave(here("Figures", "Raw", "Variable_Interest_alpha_1.pdf"),
-       height = 5,
-       width = 6, units = "in"
-)
+  y = B_V, group = species,
+  linetype = species)) +
+  geom_line(size = 0.6) +
+  geom_point(data = subset(Fitness_alpha_1_All,
+    Fitness_alpha_1_All$controlornot == 'control'),
+    aes(x =(alpha_1_rescale), y = B_V)) +
+  scale_linetype_manual(name = '', values = c(1,2)) +
+  scale_y_continuous(limits = c(0,100))+
+  xlab(expression("Asexual cycle duration (days)")) +
+  ylab("Optimal burst size") + 
+  theme_classic() + 
+  theme(axis.text  = element_text(size = 14, color = 'black'),
+        axis.title = element_text(size = 15, color = 'black'),
+        legend.position = c(0.80,0.95))
 
 
+
+duration_burst_size_GG + alpha1_GG
+
+ggsave(here("Figures","Raw", 
+            "alpha1_Scatter_PC_PF.pdf"), 
+       width = 10, height = 5, units = "in")
+
+
+
+duration_burst_size_GG + alpha1_GG 
