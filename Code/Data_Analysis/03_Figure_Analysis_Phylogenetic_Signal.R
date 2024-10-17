@@ -137,25 +137,35 @@ fit_model_ecophylo_draws <- gather_draws(
   sd_Plasmodium_species__Intercept,
   ndraws = 8000)
 
+fit_model_ecophylo_draws$.variable <- factor(
+  fit_model_ecophylo_draws$.variable, levels = c(
+    "sd_Plasmodium_species__Intercept",  
+    "sd_Parasite_name__Intercept",
+    "sd_Host_name__Intercept",
+    "sd_Host__Intercept"
+    
+  )
+)
+
 fit_draws_GG <- ggplot(fit_model_ecophylo_draws, 
     aes(x = (.variable), y= .value)) +
   stat_halfeye(.width = c(0.05, 0.95),
     point_size = 5, fill = '#ccd4e0') +
   xlab("") + 
   ylab("Coefficient estimate")+
-  ylim(0,1) +
+  scale_y_continuous(expand=c(0,0), limit = c(0,1))+
   scale_x_discrete(label = c(
-     "Host phylogeny",
-     "Host identity",
-    "Parasite identity", 
-    "Parasite phylogeny")
+    "Parasite phylogeny",
+    "Parasite identity",
+    "Host identity", 
+    "Host phylogeny")
   ) +
   theme_classic() +
   theme(axis.text = element_text(size = 12, color = 'black'),
         axis.title = element_text(size = 13, color = 'black')); 
 fit_draws_GG 
 
-ggsave(here("Figures", "Raw", "fit_draws_GG.pdf"), width = 11,
+ggsave(here("Figures", "Raw", "fit_draws_GG.pdf"), width = 9,
        height = 3, units = 'in')
 
 

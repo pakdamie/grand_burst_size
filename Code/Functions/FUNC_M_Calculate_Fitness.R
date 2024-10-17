@@ -42,8 +42,8 @@ Gametocyte_Fitness <- function(data_frame_G, species) {
   gam_dat$gam[gam_dat$gam < 0] <- 0
   
   fitness_func <- switch(species,
-                         "PC" = PrI_PC,
-                         "PF" = PrI_PF
+    "PC" = PrI_PC,
+    "PF" = PrI_PF
   )
   
   end_fitness <- max(cumsum(fitness_func(gam_dat$gam) * 1 / 10))

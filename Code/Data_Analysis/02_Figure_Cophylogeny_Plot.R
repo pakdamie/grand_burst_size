@@ -1,7 +1,5 @@
 #This script is to make PANEL B of the cophylogeny plot (Figure 3)
 #
-
-
 # Select specific columns from the mal_dat_asex data frame and create an association matrix
 association_matrix <- 
   mal_dat_asex[, c("Plasmodium_species", "Host", "Upper_Burst_Size")]

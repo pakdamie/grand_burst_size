@@ -21,13 +21,13 @@
 #' @examples Simulate_Infection(species = "PC", initial_value = "default",
 #' C_V_specific = NA, variable_interest = "pmax", include_death ="Yes")
 
-Simulate_Infection <- function(species, 
-                               initial_value = "default",
-                               C_V_specific = NA,
-                               variable_interest = NA,
-                               include_death = "Yes") {
+Simulate_Infection <- function(
+  species, 
+  initial_value = "default",
+  C_V_specific = NA, 
+  variable_interest = NA,
+  include_death = "Yes") {
   
-### Error checking.
   if (!(species %in% c("PC", "PF"))) {
     stop("Invalid input, either input `PC` for P. chabaudi or `PF`
     for P.falciparum")
@@ -42,7 +42,7 @@ Simulate_Infection <- function(species,
   ### parameter combinations we want to simulate
 
   ### Burst Size.
-  B_V <- 11# Burst size
+  B_V <- seq(1, 100, 0.5)
 
   ### If no value is given to C_V_specific, then use the default
   ### values.
@@ -55,7 +55,8 @@ Simulate_Infection <- function(species,
   ### If by chance you want to change the initial parasite number-
   ### but use the default value if you have no reason to change it.
   if (initial_value == "default") {
-    initial_value <- switch(species,
+    initial_value <- switch(
+      species,
       "PC" = 4385.965,
       "PF" = 25000
     )
@@ -65,9 +66,9 @@ Simulate_Infection <- function(species,
 
   ### Default modifiers of the variable of interest (multiplies the original
   ### value).
-  p_val <- 1 # invasion rate
-  alpha1 <- 1 # development Rate
-  mu_M <- 1 # merozoite mortality rate
+  p_val <- 1 # Invasion rate
+  mu_M <- 1 # Merozoite mortality rate
+  alpha1 <- 1 # Development Rate
   R_Modifier <- 1 # initial RBC
 
 
@@ -75,21 +76,27 @@ Simulate_Infection <- function(species,
   ###of interest modifier be? I made it species specific due to weird
   ###things happening at the boundaries.
   
-  if (is.na(variable_interest) == FALSE & variable_interest == "R_Modifier") {
-    R_Modifier <- c(c(1e-5, 1e-4, 1e-3, 0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 1), seq(2, 4, length = 5), seq(5, 100, 5))
-  } else if (is.na(variable_interest) == FALSE & variable_interest == "alpha1") {
-    alpha1 <- switch(species,
-                           "PC" = c(1, 1/2,1/3 ,1/5,24, 48,96),
-                           "PF" =c(1, 2, 2/3, 2/7,48))
-  } else if (is.na(variable_interest) == FALSE & variable_interest == "combo") {
-    p_val <- c(0.01, 0.25, 0.50, 1, 1.25, 1.50)
-    
-    #mu_M
-    mu_M <- switch(species,
-                 "PC" = c(1, 288/48 ,200/48,1440/48, 1/2, 1/48, (1/7)/48),
-                 "PF" =c(1, 288/200,200, 48/200, 24/200, 1/200, (1/7)/200))
-  }
+if (!is.na(variable_interest) && variable_interest == "R_Modifier") {
+  R_Modifier <- switch(species,
+    "PC" = c((1/3.7), (1/1.7), 1.0, 1.17, 6.57),
+    "PF" = c((1/2.17), 1.0, (1.7) ,2.0, 11.18)
+  )
+#: PC: 8500000
+#: PF: 5000000
 
+} else if (!is.na(variable_interest) && variable_interest == "alpha1") {
+  alpha1 <- switch(species,
+    "PC" = c(1, 1/2, 1/3, 1/5, 24, 48, 96),
+    "PF" = c(1, 2, 2/3, 2/7, 48)
+  )
+  
+} else if (!is.na(variable_interest) && variable_interest == "combo") {
+  p_val <- c(0.01, 0.25, 0.50, 1, 1.25, 1.50)
+  mu_M <- switch(species,
+    "PC" = c(1, 288/48, 200/48, 1440/48, 1/2, 1/48, (1/7)/48),
+    "PF" = c(1, 288/200, 200, 48/200, 24/200, 1/200, (1/7)/200)
+  )
+}
 
   ### This is the main parameter
   ### values that you use to feed into the
@@ -101,7 +108,7 @@ Simulate_Infection <- function(species,
     p_val = p_val, #invasion rate
     mu_M = mu_M, #mu_M
     R_Modifier = R_Modifier, #Initial RBC 
-    alpha_1 = 48, #asexual development time
+    alpha_1 = alpha1, #asexual development time
     initialvalue = initial_value #initial RBC
   )
 
@@ -144,7 +151,7 @@ Simulate_Infection <- function(species,
 
   ### Run the Full Model
   FULL_MODEL <- mcmapply(model_sim,
-    B_V =11.1,
+    B_V = c(B_V_C_V_F$B_V),
     C_V = c(B_V_C_V_F$C_V),
     p_val = c(B_V_C_V_F$p_val),
     mu_M = c(B_V_C_V_F$mu_M),
@@ -160,9 +167,11 @@ Simulate_Infection <- function(species,
   FULL_MODEL_DT <- do.call(rbind, FULL_MODEL)
 
   ### Write into a CSV TO BE SAVED
-  write.csv(FULL_MODEL_DT, file = here(
-    "Output", "Full_Model",
-    paste("FULL_MODEL_DT", "_", species, "_", variable_interest, ".csv", sep = "")
+  write.csv(FULL_MODEL_DT, 
+    file = here(
+      "Output", "Full_Model",
+      paste("FULL_MODEL_DT", "_", species, "_", 
+      variable_interest, ".csv", sep = "")
   ))
 
   ### Remove it now to save space
@@ -232,17 +241,18 @@ Simulate_Infection <- function(species,
   ### This is now the full model simulation where we run it until
   ### the acute phase
   if (nrow(Duration_Initial_SUCCESS) != 0) {
-        Fitness_MODEL <- mcmapply(model_sim_cut,
-                         B_V = c(Duration_Initial_SUCCESS$B_V),
-                         C_V = c(Duration_Initial_SUCCESS$C_V),
-                         p_val = c(Duration_Initial_SUCCESS$p_val),
-                         mu_M = c(Duration_Initial_SUCCESS$mu_M),
-                         alpha_1 = c(Duration_Initial_SUCCESS$alpha_1),
-                         R_Modifier = c(Duration_Initial_SUCCESS$R_Modifier),
-                         initialvalue = c(initial_value),
-                         endtime = c(Duration_Initial_SUCCESS$endtime),
-                         mc.cores = 3,
-                         SIMPLIFY = FALSE
+    Fitness_MODEL <- mcmapply(
+      model_sim_cut,
+      B_V = c(Duration_Initial_SUCCESS$B_V),
+      C_V = c(Duration_Initial_SUCCESS$C_V),
+      p_val = c(Duration_Initial_SUCCESS$p_val),
+      mu_M = c(Duration_Initial_SUCCESS$mu_M),
+      alpha_1 = c(Duration_Initial_SUCCESS$alpha_1),
+      R_Modifier = c(Duration_Initial_SUCCESS$R_Modifier),
+      initialvalue = c(initial_value),
+      endtime = c(Duration_Initial_SUCCESS$endtime),
+      mc.cores = 3,
+      SIMPLIFY = FALSE
     )
 
     Duration_Initial_SUCCESS$end_fitness <-

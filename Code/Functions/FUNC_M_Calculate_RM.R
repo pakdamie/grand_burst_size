@@ -47,23 +47,23 @@ RM_Calculator <- function(species, x_list) {
   
   
   alpha_mod <- switch(species,
-                      "PC" =  (unique_alpha_val) * 1,
-                      "PF" =  (unique_alpha_val) * 1/2)
+    "PC" =  (unique_alpha_val) * 1,
+    "PF" =  (unique_alpha_val) * 1/2)
   
   ### Time delay
   time_delayer <- switch(species,
-    "PC" = ((100 * (alpha_mod ))^100) / ((100 * (alpha_mod) + 0.025))^100,
-    "PF" = ((10 * (alpha_mod ))^10) / ((10 * (alpha_mod ) + (1 / 120)))^10
+    "PC" = ((100 * (alpha_mod))^100) / ((100 * (alpha_mod) + 0.025))^100,
+    "PF" = ((10 * (alpha_mod))^10) / ((10 * (alpha_mod ) + (1 / 120)))^10
   )
  
   
   p_mod <- switch(species,
-                  "PC" = unique_p_val * 4.0e-6,
-                  "PF" = unique_p_val * 8.35e-6)
+    "PC" = unique_p_val * 4.0e-6,
+    "PF" = unique_p_val * 8.35e-6)
   
   mu_mod <- switch(species,
-                   "PC" =  unique_mu_M_val * 48,
-                   "PF" =  unique_mu_M_val* 200)
+     "PC" =  unique_mu_M_val * 48,
+     "PF" =  unique_mu_M_val* 200)
 
   ### The rate is then calculated here
   rate <- time_delayer * (1 - unique_C_V) * unique_B_V *
